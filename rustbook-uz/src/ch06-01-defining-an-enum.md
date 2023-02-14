@@ -123,27 +123,20 @@ Dasturlash tilining dizayni ko'pincha siz qaysi xususiyatlarni o'z ichiga olganl
 
 2009 yilgi "Null References: The Million Dollar Mistake" taqdimotida null ixtirochisi Tony Hoare shunday deydi:
 
-> I call it my billion-dollar mistake. At that time, I was designing the first
-> comprehensive type system for references in an object-oriented language. My
-> goal was to ensure that all use of references should be absolutely safe, with
-> checking performed automatically by the compiler. But I couldn’t resist the
-> temptation to put in a null reference, simply because it was so easy to
-> implement. This has led to innumerable errors, vulnerabilities, and system
-> crashes, which have probably caused a billion dollars of pain and damage in
-> the last forty years.
+> Men buni milliard dollarlik xatoyim deb atayman. O'sha paytda men object-oriented language
+> referencelar uchun birinchi keng qamrovli turdagi tizimni loyihalashtirgan edim. Mening maqsadim
+> referencelardan foydalanishning mutlaqo xavfsiz bo'lishini ta'minlash edi, tekshirish kompilyator
+> tomonidan avtomatik ravishda amalga oshiriladi. Lekin men null reference qo'yish vasvasasiga
+> qarshi tura olmadim, chunki uni amalga oshirish juda oson edi.
+> Bu so'nggi qirq yil ichida bir milliard dollar og'riq va zarar keltirgan
+> son-sanoqsiz xatolar, zaifliklar va tizimning ishdan chiqishiga olib keldi.
 
-The problem with null values is that if you try to use a null value as a
-not-null value, you’ll get an error of some kind. Because this null or not-null
-property is pervasive, it’s extremely easy to make this kind of error.
+Null qiymatlari bilan bog'liq muammo shundaki, agar siz null qiymatdan a sifatida foydalanishga harakat qilsangiz
+no-null qiymat bo'lsa, siz qandaydir xatoga duch kelasiz. Ushbu null yoki not-null xususiyat keng tarqalganligi sababli, bunday xatoga yo'l qo'yish juda oson.
 
-However, the concept that null is trying to express is still a useful one: a
-null is a value that is currently invalid or absent for some reason.
+Biroq, null ifodalamoqchi bo'lgan kontseptsiya hali ham foydalidir: null hozirda yaroqsiz yoki biron sababga ko'ra mavjud bo'lmagan qiymatdir.
 
-The problem isn’t really with the concept but with the particular
-implementation. As such, Rust does not have nulls, but it does have an enum
-that can encode the concept of a value being present or absent. This enum is
-`Option<T>`, and it is [defined by the standard library][option]<!-- ignore -->
-as follows:
+Muammo aslida kontseptsiyada emas, balki muayyan amalga oshirishda. Shunday qilib, Rust nulllarga ega emas, lekin u mavjud yoki yo'q qiymat tushunchasini kodlay oladigan enumga ega. Bu enum `Option<T>` bo'lib, u [standart kutubxona tomonidan][option]<!-- ignore --> quyidagicha aniqlanadi: 
 
 ```rust
 enum Option<T> {
@@ -152,64 +145,34 @@ enum Option<T> {
 }
 ```
 
-The `Option<T>` enum is so useful that it’s even included in the prelude; you
-don’t need to bring it into scope explicitly. Its variants are also included in
-the prelude: you can use `Some` and `None` directly without the `Option::`
-prefix. The `Option<T>` enum is still just a regular enum, and `Some(T)` and
-`None` are still variants of type `Option<T>`.
+`Option<T>` enumi shunchalik foydaliki, u hatto muqaddimaga ham kiritilgan; uni aniq doiraga kiritishingiz shart emas. Uning variantlari ham muqaddima tarkibiga kiritilgan: `Some` va `None` dan `Option::` prefiksisiz bevosita foydalanishingiz mumkin. `Option<T>` enum hali ham oddiy enum bo'lib, `Some(T)` va `None` hali ham `Option<T>` turidagi variantlardir.
 
-The `<T>` syntax is a feature of Rust we haven’t talked about yet. It’s a
-generic type parameter, and we’ll cover generics in more detail in Chapter 10.
-For now, all you need to know is that `<T>` means that the `Some` variant of
-the `Option` enum can hold one piece of data of any type, and that each
-concrete type that gets used in place of `T` makes the overall `Option<T>` type
-a different type. Here are some examples of using `Option` values to hold
-number types and string types:
+`<T>` sintaksisi Rustning oʻziga xos xususiyati boʻlib, biz hali gaplashmaganmiz. Bu umumiy turdagi parametr va biz 10-bobda genericlarni batafsil ko'rib chiqamiz.
+Hozircha siz bilishingiz kerak bo'lgan narsa shuki, `<T>` `Option` enumining `Some` varianti har qanday turdagi ma'lumotlarning bir qismini saqlashi mumkinligini va o'rniga qo'llaniladigan har bir konkret turni bildiradi. `T` umumiy `Option<T>` turini boshqa turga aylantiradi. Raqam turlari va qator turlarini saqlash uchun `Option` qiymatlaridan foydalanishga misollar keltiramiz:
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-06-option-examples/src/main.rs:here}}
 ```
 
-The type of `some_number` is `Option<i32>`. The type of `some_char` is
-`Option<char>`, which is a different type. Rust can infer these types because
-we’ve specified a value inside the `Some` variant. For `absent_number`, Rust
-requires us to annotate the overall `Option` type: the compiler can’t infer the
-type that the corresponding `Some` variant will hold by looking only at a
-`None` value. Here, we tell Rust that we mean for `absent_number` to be of type
-`Option<i32>`.
+`raqam` turi - `Option<i32>`. `belgi` turi `Option<char>` bo'lib, u boshqa tur. Rust bu turlarni aniqlashi mumkin, chunki biz `Some` variantida qiymat belgilaganmiz. `yoq_raqam` uchun Rust bizdan umumiy `Option` turiga izoh berishimizni talab qiladi: kompilyator faqat `None` qiymatiga qarab mos keladigan `Some` varianti qanday turga ega bo'lishini aniqlay olmaydi. Bu yerda biz Rustga aytamizki, biz `yoq_raqam` `Option<i32>` turida bo'lishini nazarda tutamiz.
 
-When we have a `Some` value, we know that a value is present and the value is
-held within the `Some`. When we have a `None` value, in some sense it means the
-same thing as null: we don’t have a valid value. So why is having `Option<T>`
-any better than having null?
+Agar bizda `Some` qiymati bo'lsa, biz qiymat mavjud ekanligini va qiymat `Some` ichida saqlanishini bilamiz. Agar bizda `None` qiymati bo'lsa, u qaysidir ma'noda null bilan bir xil narsani anglatadi: bizda haqiqiy qiymat yo'q. Xo'sh, nega `Option<T>` nullga ega bo'lishdan yaxshiroq?
 
-In short, because `Option<T>` and `T` (where `T` can be any type) are different
-types, the compiler won’t let us use an `Option<T>` value as if it were
-definitely a valid value. For example, this code won’t compile, because it’s
-trying to add an `i8` to an `Option<i8>`:
+Xulosa qilib aytganda, `Option<T>` va `T` (bu erda `T` har qanday tur bo'lishi mumkin) har xil turdagi, chunki kompilyator bizga `Option<T>` qiymatidan foydalanishga ruxsat bermaydi, go'yo bu haqiqiy qiymat. Masalan, bu kod kompilyatsiya qilinmaydi, chunki u `Option<i8>`ga `i8` qo`shishga harakat qilmoqda:
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-07-cant-use-option-directly/src/main.rs:here}}
 ```
 
-If we run this code, we get an error message like this one:
+Agar biz ushbu kodni ishlatsak, biz quyidagi kabi xato xabarini olamiz:
 
 ```console
 {{#include ../listings/ch06-enums-and-pattern-matching/no-listing-07-cant-use-option-directly/output.txt}}
 ```
 
-Intense! In effect, this error message means that Rust doesn’t understand how
-to add an `i8` and an `Option<i8>`, because they’re different types. When we
-have a value of a type like `i8` in Rust, the compiler will ensure that we
-always have a valid value. We can proceed confidently without having to check
-for null before using that value. Only when we have an `Option<i8>` (or
-whatever type of value we’re working with) do we have to worry about possibly
-not having a value, and the compiler will make sure we handle that case before
-using the value.
+Kuchli! Aslida, bu xato xabari Rust `i8` va `Option<i8>` ni qanday qo'shishni tushunmasligini anglatadi, chunki ular turli xil. Rustda `i8` kabi turdagi qiymatga ega bo'lsak, kompilyator bizda har doim haqiqiy qiymatga ega bo'lishini ta'minlaydi. Ushbu qiymatdan foydalanishdan oldin nullni tekshirmasdan ishonch bilan davom etishimiz mumkin. Faqat bizda `Option<i8>` (yoki qanday turdagi qiymat bilan ishlayotgan bo'lishimizdan qat'iy nazar) mavjud bo'lganda, biz qiymatga ega bo'lmasligimizdan xavotirlanishimiz kerak va kompilyator qiymatdan foydalanishdan oldin bu holatni hal qilishimizga ishonch hosil qiladi.
 
-In other words, you have to convert an `Option<T>` to a `T` before you can
-perform `T` operations with it. Generally, this helps catch one of the most
-common issues with null: assuming that something isn’t null when it actually is.
+Boshqacha qilib aytganda, `T` amallarini bajarishdan oldin `Option<T>`ni `T` ga aylantirishingiz kerak. Umuman olganda, bu null bilan bog'liq eng keng tarqalgan muammolardan birini hal qilishga yordam beradi: agar biror narsa bo'lsa, u null emas deb taxmin qilish.
 
 Eliminating the risk of incorrectly assuming a not-null value helps you to be
 more confident in your code. In order to have a value that can possibly be
