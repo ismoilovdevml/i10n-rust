@@ -99,82 +99,46 @@ Biz muhokama qilishimiz kerak bo'lgan `match` ning yana bir jihati bor: arm patt
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-10-non-exhaustive-match/src/main.rs:here}}
 ```
 
-We didn’t handle the `None` case, so this code will cause a bug. Luckily, it’s
-a bug Rust knows how to catch. If we try to compile this code, we’ll get this
-error:
+Biz `None` holatini ko‘rib chiqmadik, shuning uchun bu kod xatolikka olib keladi. Yaxshiyamki, bu xato Rust qanday tutishni biladi. Agar biz ushbu kodni kompilyatsiya qilishga harakat qilsak, biz ushbu xatoni olamiz:
 
 ```console
 {{#include ../listings/ch06-enums-and-pattern-matching/no-listing-10-non-exhaustive-match/output.txt}}
 ```
 
-Rust knows that we didn’t cover every possible case, and even knows which
-pattern we forgot! Matches in Rust are *exhaustive*: we must exhaust every last
-possibility in order for the code to be valid. Especially in the case of
-`Option<T>`, when Rust prevents us from forgetting to explicitly handle the
-`None` case, it protects us from assuming that we have a value when we might
-have null, thus making the billion-dollar mistake discussed earlier impossible.
+Rust biz barcha mumkin bo'lgan holatlarni qamrab olmaganimizni biladi va hatto qaysi patterni unutganimizni biladi! Rust-da matchlar to'liq: kod to'g'ri bo'lishi uchun biz barcha mumkin bo'lgan holatlarni qamrab olishimiz kerak. Ayniqsa, `Option<T>` holatida, Rust bizni `None` holatini aniq ko'rib chiqishni unutib qo'yishimizga to'sqinlik qilsa, bizni null bo'lishi mumkin bo'lgan qiymatga ega bo`lishimizdan himoya qiladi, shunday qilib, ilgari muhokama qilingan milliard dollarlik xatoni imkonsiz qiladi.
 
-### Catch-all Patterns and the `_` Placeholder
+### Hammasini ushlash patternlari va `_` placeholder
 
-Using enums, we can also take special actions for a few particular values, but
-for all other values take one default action. Imagine we’re implementing a game
-where, if you roll a 3 on a dice roll, your player doesn’t move, but instead
-gets a new fancy hat. If you roll a 7, your player loses a fancy hat. For all
-other values, your player moves that number of spaces on the game board. Here’s
-a `match` that implements that logic, with the result of the dice roll
-hardcoded rather than a random value, and all other logic represented by
-functions without bodies because actually implementing them is out of scope for
-this example:
+Enumlardan foydalanib, biz bir nechta ma'lum qiymatlar uchun maxsus harakatlarni amalga oshirishimiz mumkin, ammo boshqa barcha qiymatlar uchun bitta standart amalni bajaramiz. Tasavvur qiling-a, biz o'yinni amalga oshirmoqdamiz, unda 3 ta o'yinda o'yinchi qimirlamaydi, aksincha, chiroyli yangi shlyapa oladi. Agar siz 7 ni aylantirsangiz, o'yinchingiz chiroyli shlyapasini yo'qotadi. Boshqa barcha qiymatlar uchun o'yinchi o'yin taxtasida shuncha bo'sh joyni siljitadi. Mana, bu mantiqni amalga oshiradigan `match`, bu erda narda toshlarni o'rash natijasi tasodifiy qiymat emas, balki qattiq kodlangan va mantiqning qolgan qismi jismlarsiz funktsiyalar bilan ifodalanadi, chunki ularni amalga oshirish ushbu doiradan tashqarida. misol:
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-15-binding-catchall/src/main.rs:here}}
 ```
 
-For the first two arms, the patterns are the literal values `3` and `7`. For
-the last arm that covers every other possible value, the pattern is the
-variable we’ve chosen to name `other`. The code that runs for the `other` arm
-uses the variable by passing it to the `move_player` function.
+Dastlabki ikkita arm uchun patternlar `3` va `7` harfli qiymatlardir. Boshqa barcha mumkin bo'lgan qiymatlarni qamrab oladigan oxirgi arm uchun pattern biz `boshqa` deb nomlash uchun tanlagan o'zgaruvchidir. `boshqa` arm uchun ishlaydigan kod o'zgaruvchini `player_harakati` funksiyasiga o'tkazish orqali ishlatadi.
 
-This code compiles, even though we haven’t listed all the possible values a
-`u8` can have, because the last pattern will match all values not specifically
-listed. This catch-all pattern meets the requirement that `match` must be
-exhaustive. Note that we have to put the catch-all arm last because the
-patterns are evaluated in order. If we put the catch-all arm earlier, the other
-arms would never run, so Rust will warn us if we add arms after a catch-all!
+Ushbu kod kompilatsiya qilinadi, garchi biz `u8` ga ega bo'lishi mumkin bo'lgan barcha qiymatlarni sanab o'tmagan bo'lsak ham, chunki oxirgi pattern maxsus sanab o'tilmagan barcha qiymatlarga mos keladi. Bu `match` toʻliq boʻlishi kerakligi haqidagi talabga javob beradi. E'tibor bering, biz armni eng oxirgi qo'yishimiz kerak, chunki patternlar tartibda baholanadi. Agar biz ushlovchi armni oldinroq qo'ysak, boshqa armlar hech qachon run bo'lmaydi, shuning uchun biz hammamizni tutgandan keyin arm qo'shsak, Rust bizni ogohlantiradi!
 
-Rust also has a pattern we can use when we want a catch-all but don’t want to
-*use* the value in the catch-all pattern: `_` is a special pattern that matches
-any value and does not bind to that value. This tells Rust we aren’t going to
-use the value, so Rust won’t warn us about an unused variable.
+Rustda umumiy patterda qiymatdan foydalanishni istamaganimizda foydalanish mumkin bo'lgan pattern ham mavjud: `_` - har qanday qiymatga mos keladigan va bu qiymatga bog'lanmaydigan maxsus pattern. Bu Rustga biz qiymatdan foydalanmasligimizni bildiradi, shuning uchun Rust bizni foydalanilmagan o'zgaruvchi haqida ogohlantirmaydi.
 
-Let’s change the rules of the game: now, if you roll anything other than a 3 or
-a 7, you must roll again. We no longer need to use the catch-all value, so we
-can change our code to use `_` instead of the variable named `other`:
+Keling, o'yin qoidalarini shunday o'zgartiraylik: agar 3 yoki 7 dan boshqa narda toshi paydo bo'lsa, siz yana boshqatdan aylantirib tashlashingiz  kerak. Biz endi catch-all qiymatidan foydalanishimiz shart emas, shuning uchun biz kodimizni `boshqa` deb nomlangan o‘zgaruvchi o‘rniga `_` ishlatish uchun o‘zgartirishimiz mumkin:
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-16-underscore-catchall/src/main.rs:here}}
 ```
 
-This example also meets the exhaustiveness requirement because we’re explicitly
-ignoring all other values in the last arm; we haven’t forgotten anything.
+Bu misol, shuningdek, to'liqlik talabiga javob beradi, chunki biz oxirgi qismdagi barcha boshqa qiymatlarni e'tiborsiz qoldiramiz; biz hech narsani unutmadik.
 
-Finally, we’ll change the rules of the game one more time so that nothing else
-happens on your turn if you roll anything other than a 3 or a 7. We can express
-that by using the unit value (the empty tuple type we mentioned in [“The Tuple
-Type”][tuples]<!-- ignore --> section) as the code that goes with the `_` arm:
+Nihoyat, biz o'yin qoidalarini yana bir bor o'zgartiramiz, shunda siz 3 yoki 7 ni o'tkazmaguningizcha sizning navbatingizda hech narsa sodir bo'lmaydi. Biz buni birlik qiymatidan (biz ["Tuple turi"][tuples]<!-- ignore --> section da aytib o'tgan bo'sh tuple turi) `_` armi bilan birga keladigan kod sifatida ifodalashimiz mumkin:
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-17-underscore-unit/src/main.rs:here}}
 ```
 
-Here, we’re telling Rust explicitly that we aren’t going to use any other value
-that doesn’t match a pattern in an earlier arm, and we don’t want to run any
-code in this case.
+Bu yerda biz Rustga aniq aytamizki, biz avvalgi armdagi patternga mos kelmaydigan boshqa qiymatdan foydalanmaymiz va bu holda hech qanday kodni ishga tushirishni xohlamaymiz.
 
-There’s more about patterns and matching that we’ll cover in [Chapter
-18][ch18-00-patterns]<!-- ignore -->. For now, we’re going to move on to the
-`if let` syntax, which can be useful in situations where the `match` expression
-is a bit wordy.
+[18-bobda][ch18-00-patterns]<!-- ignore --> biz ko'rib chiqadigan patternlar va match haqida ko'proq ma'lumot bor.
+Hozircha biz `if let` sintaksisiga o‘tamiz, bu `match` ifodasi juda batafsil bo'lgan holatlarda foydali bo'lishi mumkin.
 
 [tuples]: ch03-02-data-types.html#the-tuple-type
 [ch18-00-patterns]: ch18-00-patterns.html
