@@ -1,127 +1,85 @@
-## Separating Modules into Different Files
+## Modullarni turli fayllarga ajratish
 
-So far, all the examples in this chapter defined multiple modules in one file.
-When modules get large, you might want to move their definitions to a separate
-file to make the code easier to navigate.
+Hozirgacha ushbu bobdagi barcha misollar bitta faylda bir nechta modullarni aniqladi.
+Modullar kattalashganda, kodni boshqarishni osonlashtirish uchun ularning definitionlarini alohida faylga ko'chirishingiz mumkin.
 
-For example, let’s start from the code in Listing 7-17 that had multiple
-restaurant modules. We’ll extract modules into files instead of having all the
-modules defined in the crate root file. In this case, the crate root file is
-*src/lib.rs*, but this procedure also works with binary crates whose crate root
-file is *src/main.rs*.
+Masalan, 7-17 ro'yxatdagi bir nechta restoran moduliga ega bo'lgan koddan boshlaylik. Biz cratening ildiz modulidagi barcha modullarni aniqlash o'rniga modullarni fayllarga ajratamiz. Bunday holda, cratening ildiz fayli *src/lib.rs* bo'ladi, lekin bu protsedura crate ildiz fayli *src/main.rs* bo'lgan binary cratelar bilan ham ishlaydi.
 
-First, we’ll extract the `front_of_house` module to its own file. Remove the
-code inside the curly brackets for the `front_of_house` module, leaving only
-the `mod front_of_house;` declaration, so that *src/lib.rs* contains the code
-shown in Listing 7-21. Note that this won’t compile until we create the
-*src/front_of_house.rs* file in Listing 7-22.
+Birinchidan, biz `uyning_oldi` modulini o'z fayliga chiqaramiz. `uyning_oldi` moduli uchun jingalak qavslar ichidagi kodni olib tashlang va faqat `mod uyning_oldi` deklaratsiyasini qoldiring, shunda *src/lib.rs* ro'yxat 7-21da ko'rsatilgan kodni o`z ichiga oladi. E'tibor bering, biz 7-22 ro'yxatda *src/uyning_oldi.rs* faylini yaratmagunimizcha, bu kompilyatsiya qilinmaydi.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch07-managing-growing-projects/listing-07-21-and-22/src/lib.rs}}
 ```
 
-<span class="caption">Listing 7-21: Declaring the `front_of_house` module whose
-body will be in *src/front_of_house.rs*</span>
+<span class="caption">Ro'yxat 7-21. Tarkibi `src/uyning_oldi.rs` da joylashgan `uyning_oldi` modulini e'lon qilish</span>
 
-Next, place the code that was in the curly brackets into a new file named
-*src/front_of_house.rs*, as shown in Listing 7-22. The compiler knows to look
-in this file because it came across the module declaration in the crate root
-with the name `front_of_house`.
+Keyin, jingalak qavslardagi kodni yangi faylga joylashtiring
+7-22 ro'yxatda ko'rsatilganidek *src/uyning_oldi.rs* deb nomlangan. Kompilyator bu faylda nimani izlash kerakligini biladi, chunki u `uyning_oldi` deb nomlangan cratening ildiz modulida modul deklaratsiyasiga duch keldi.
 
-<span class="filename">Filename: src/front_of_house.rs</span>
+<span class="filename">Fayl nomi: src/uyning_oldi.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch07-managing-growing-projects/listing-07-21-and-22/src/front_of_house.rs}}
 ```
 
-<span class="caption">Listing 7-22: Definitions inside the `front_of_house`
-module in *src/front_of_house.rs*</span>
+<span class="caption">Ro'yxat 7-22. *src/uyning_oldi.rs* faylida `uyning_oldi` modulining mazmunini aniqlash</span>
 
-Note that you only need to load a file using a `mod` declaration *once* in your
-module tree. Once the compiler knows the file is part of the project (and knows
-where in the module tree the code resides because of where you’ve put the `mod`
-statement), other files in your project should refer to the loaded file’s code
-using a path to where it was declared, as covered in the [“Paths for Referring
-to an Item in the Module Tree”][paths]<!-- ignore --> section. In other words,
-`mod` is *not* an “include” operation that you may have seen in other
-programming languages.
+Esda tutingki, modul daraxtida *bir marta* `mod` deklaratsiyasidan foydalanib faylni yuklashingiz kerak. Kompilyator fayl loyihaning bir qismi ekanligini bilgandan so'ng (va `mod` statementi qo'ygan joyingiz tufayli kod modul daraxtining qayerida joylashganligini biladi), loyihangizdagi boshqa fayllar yuklangan fayl kodiga u e'lon qilingan joyga yo'l orqali murojaat qilishi kerak, bu ["Modul daraxtidagi elementga murojaat qilish yo'llari"][paths]<!-- ignore --> bo'limida yoritilgan. Boshqacha qilib aytganda, `mod` boshqa dasturlash tillarida ko'rishingiz mumkin bo'lgan “include” operatsiyasi emas.
 
-Next, we’ll extract the `hosting` module to its own file. The process is a bit
-different because `hosting` is a child module of `front_of_house`, not of the
-root module. We’ll place the file for `hosting` in a new directory that will be
-named for its ancestors in the module tree, in this case *src/front_of_house/*.
+Keyinchalik, biz `xizmat` modulini o'z fayliga chiqaramiz. Jarayon biroz boshqacha, chunki `xizmat` ildiz modulining emas, balki `uyning_oldi` ichki modulidir.Biz `xizmat` faylini modul daraxtidagi ajdodlari nomi bilan ataladigan yangi jildga joylashtiramiz, bu holda *src/uyning_oldi/*.
 
-To start moving `hosting`, we change *src/front_of_house.rs* to contain only the
-declaration of the `hosting` module:
+`xizmat`ni ko‘chirishni boshlash uchun biz *src/uyning_oldi.rs* ni faqat `xizmat` moduli deklaratsiyasini o‘z ichiga olgan holda o‘zgartiramiz:
 
-<span class="filename">Filename: src/front_of_house.rs</span>
+<span class="filename">Fayl nomi: src/uyning_oldi.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch07-managing-growing-projects/no-listing-02-extracting-hosting/src/front_of_house.rs}}
 ```
 
-Then we create a *src/front_of_house* directory and a file *hosting.rs* to
-contain the definitions made in the `hosting` module:
+Keyin biz *src/uyning_oldi* jildini va `xizmat` modulida berilgan definitionlarni o'z ichiga olgan *xizmat.rs* faylini yaratamiz:
 
-<span class="filename">Filename: src/front_of_house/hosting.rs</span>
+<span class="filename">Fayl nomi: src/uyning_oldi/xizmat.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch07-managing-growing-projects/no-listing-02-extracting-hosting/src/front_of_house/hosting.rs}}
 ```
 
-If we instead put *hosting.rs* in the *src* directory, the compiler would
-expect the *hosting.rs* code to be in a `hosting` module declared in the crate
-root, and not declared as a child of the `front_of_house` module. The
-compiler’s rules for which files to check for which modules’ code means the
-directories and files more closely match the module tree.
+Agar biz *src* jildiga *xizmat.rs* ni qo'ysak, kompilyator *xizmat.rs* kodi crate ildizida e'lon qilingan va `uyning_oldi` modulining yordamchisi sifatida e'lon qilinmagan `xizmat` modulida bo'lishini kutadi. Kompilyator qoidalari qaysi modullarning kodini o'z ichiga olgan fayllarni tekshirish uchun jildlar va fayllar modul daraxtiga to'liq mos kelishini taxmin qiladi.
 
-> ### Alternate File Paths
+> ### Muqobil fayl yo'llari
 >
-> So far we’ve covered the most idiomatic file paths the Rust compiler uses,
-> but Rust also supports an older style of file path. For a module named
-> `front_of_house` declared in the crate root, the compiler will look for the
+> Hozirgacha biz Rust kompilyatori foydalanadigan eng idiomatik fayl yo'llarini ko'rib chiqdik,
+> lekin Rust fayl yo'lining eski uslubini ham qo'llab-quvvatlaydi. Crate ildizida e'lon qilingan
+> `uyning_oldi` nomli modul uchun kompilyator modul kodini quyidagilardan qidiradi:
 > module’s code in:
 >
-> * *src/front_of_house.rs* (what we covered)
-> * *src/front_of_house/mod.rs* (older style, still supported path)
+> * *src/uyning_oldi.rs* (biz nimani qamrab oldik)
+> * *src/uyning_oldi/mod.rs* (eski uslub, hali ham qo'llab-quvvatlanadigan yo'l)
 >
-> For a module named `hosting` that is a submodule of `front_of_house`, the
-> compiler will look for the module’s code in:
+> `uyning_oldi` submodul bo'lgan `xizmat` nomli modul uchun kompilyator modul kodini qidiradi:
 >
-> * *src/front_of_house/hosting.rs* (what we covered)
-> * *src/front_of_house/hosting/mod.rs* (older style, still supported path)
+> * *src/uyning_oldi/xizmat.rs* (biz nimani qamrab oldik)
+> * *src/uyning_oldi/xizmat/mod.rs* (eski uslub, hali ham qo'llab-quvvatlanadigan yo'l)
 >
-> If you use both styles for the same module, you’ll get a compiler error. Using
-> a mix of both styles for different modules in the same project is allowed, but
-> might be confusing for people navigating your project.
+> Agar bir xil modul uchun ikkala uslubdan foydalansangiz, kompilyator xatosi paydo bo'ladi. Bitta
+> loyihada turli modullar uchun ikkala uslubning aralashmasidan foydalanishga ruxsat
+> beriladi, lekin loyihangizni boshqarayotgan odamlar uchun chalkash bo'lishi mumkin.
 >
-> The main downside to the style that uses files named *mod.rs* is that your
-> project can end up with many files named *mod.rs*, which can get confusing
-> when you have them open in your editor at the same time.
+> *mod.rs* nomli fayllardan foydalanadigan uslubning asosiy kamchiligi
+> shundaki, sizning loyihangiz *mod.rs* nomli ko‘plab fayllar bilan
+> tugashi mumkin, ular bir vaqtning o‘zida muharriringizda ochilganda
+> chalkash bo‘lishi mumkin.
 
-We’ve moved each module’s code to a separate file, and the module tree remains
-the same. The function calls in `eat_at_restaurant` will work without any
-modification, even though the definitions live in different files. This
-technique lets you move modules to new files as they grow in size.
+Biz har bir modul kodini alohida faylga ko'chirdik va modul daraxti o'zgarishsiz qoldi. `restoranda_ovqatlanish` funksiyasi chaqiruvlari, definitionlar turli fayllarda bo'lsa ham, hech qanday o'zgartirishlarsiz ishlaydi. Ushbu texnika modullarni hajmi oshgani sayin yangi fayllarga ko'chirish imkonini beradi.
 
-Note that the `pub use crate::front_of_house::hosting` statement in
-*src/lib.rs* also hasn’t changed, nor does `use` have any impact on what files
-are compiled as part of the crate. The `mod` keyword declares modules, and Rust
-looks in a file with the same name as the module for the code that goes into
-that module.
+Esda tutingki, *src/lib.rs* dagi `pub use crate::uyning_oldi::xizmat` statementi ham o'zgarmagan va `use` qaysi fayllar cratening bir qismi sifatida tuzilganiga ta'sir qilmaydi. `mod` kalit so'zi modullarni e'lon qiladi va Rust ushbu modulga kiradigan kod moduli bilan bir xil nomdagi faylga qaraydi.
 
-## Summary
+## Xulosa
 
-Rust lets you split a package into multiple crates and a crate into modules
-so you can refer to items defined in one module from another module. You can do
-this by specifying absolute or relative paths. These paths can be brought into
-scope with a `use` statement so you can use a shorter path for multiple uses of
-the item in that scope. Module code is private by default, but you can make
-definitions public by adding the `pub` keyword.
+Rust sizga paketni bir nechta cratelarga va crateni modullarga bo'lish imkonini beradi, shunda siz bir modulda belgilangan elementlarga boshqa moduldan murojaat qilishingiz mumkin. Buni mutlaq yoki nisbiy yo'llarni belgilash orqali amalga oshirishingiz mumkin. Ushbu yo'llar `use` statementi bilan qamrab olinishi mumkin, shuning uchun siz ushbu doiradagi elementdan bir nechta foydalanish uchun qisqaroq yo'ldan foydalanishingiz mumkin. Modul kodi standart boʻyicha maxfiydir, lekin `pub` kalit soʻzini qoʻshish orqali definitionlarni hammaga ommaviy qilishingiz mumkin.
 
-In the next chapter, we’ll look at some collection data structures in the
-standard library that you can use in your neatly organized code.
+Keyingi bobda biz standart kutubxonadagi ma'lumotlar tuzilmalarining ba'zi to'plamlarini ko'rib chiqamiz, ulardan siz o'zingizning aniq tartiblangan kodingizda foydalanishingiz mumkin.
 
 [paths]: ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html
