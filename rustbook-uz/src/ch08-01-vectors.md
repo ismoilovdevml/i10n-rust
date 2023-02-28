@@ -1,127 +1,70 @@
-## Storing Lists of Values with Vectors
+## Vectorlar bilan qiymatlar ro'yxatini saqlash
 
-The first collection type we’ll look at is `Vec<T>`, also known as a *vector*.
-Vectors allow you to store more than one value in a single data structure that
-puts all the values next to each other in memory. Vectors can only store values
-of the same type. They are useful when you have a list of items, such as the
-lines of text in a file or the prices of items in a shopping cart.
+Biz ko'rib chiqadigan birinchi to'plam turi `Vec<T>` bo'lib, u *vector* sifatida ham tanilgan.
+Vectorlar xotirada barcha qiymatlarni yonma-yon joylashtirgan yagona ma'lumotlar strukturasida bir nechta qiymatlarni saqlash imkonini beradi. Vectorlar faqat bir xil turdagi qiymatlarni saqlashi mumkin. Ular sizda fayldagi matn satrlari yoki xarid qilish savatidagi narsalarning narxlari kabi elementlar ro'yxatiga ega bo'lsangiz foydali bo'ladi.
 
-### Creating a New Vector
+### Yangi vector yaratish
 
-To create a new empty vector, we call the `Vec::new` function, as shown in
-Listing 8-1.
+Yangi bo'sh vector yaratish uchun biz 8-1 ro'yxatda ko'rsatilganidek, `Vec::new` funksiyasini chaqiramiz.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-01/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-1: Creating a new, empty vector to hold values
-of type `i32`</span>
+<span class="caption">Roʻyxat 8-1: `i32` turidagi qiymatlarni saqlash uchun yangi, boʻsh vector yaratish</span>
 
-Note that we added a type annotation here. Because we aren’t inserting any
-values into this vector, Rust doesn’t know what kind of elements we intend to
-store. This is an important point. Vectors are implemented using generics;
-we’ll cover how to use generics with your own types in Chapter 10. For now,
-know that the `Vec<T>` type provided by the standard library can hold any type.
-When we create a vector to hold a specific type, we can specify the type within
-angle brackets. In Listing 8-1, we’ve told Rust that the `Vec<T>` in `v` will
-hold elements of the `i32` type.
+E'tibor bering, biz bu erda annation tur qo'shdik. Biz ushbu vectorga hech qanday qiymat kiritmayotganimiz sababli, Rust biz qanday elementlarni saqlashni xohlayotganimizni bilmaydi. Bu muhim nuqta. Vectorlar generiklar yordamida amalga oshiriladi; Biz 10-bobda o'zingizning turlaringiz bilan generiklardan qanday foydalanishni ko'rib chiqamiz. Hozircha shuni bilingki, standart kutubxona tomonidan taqdim etilgan `Vec<T>` turi har qanday turni sig'dira oladi.
+Muayyan turni ushlab turish uchun vector yaratganimizda, burchakli qavslar([]) ichida turni belgilashimiz mumkin. 8-1 roʻyxatida biz Rustga `v`dagi `Vec<T>` `i32` turidagi elementlarni saqlashini aytdik.
 
-More often, you’ll create a `Vec<T>` with initial values and Rust will infer
-the type of value you want to store, so you rarely need to do this type
-annotation. Rust conveniently provides the `vec!` macro, which will create a
-new vector that holds the values you give it. Listing 8-2 creates a new
-`Vec<i32>` that holds the values `1`, `2`, and `3`. The integer type is `i32`
-because that’s the default integer type, as we discussed in the [“Data
-Types”][data-types]<!-- ignore --> section of Chapter 3.
+Ko'pincha siz boshlang'ich qiymatlari bilan `Vec<T>` ni yaratasiz va Rust siz saqlamoqchi bo'lgan qiymat turini aniqlaydi, shuning uchun kamdan-kam hollarda bu turdagi annotionni bajarishingiz kerak bo'ladi. Rust qulay tarzda `vec!` makrosini taqdim etadi, bu esa siz bergan qiymatlarni saqlaydigan yangi vectorni yaratadi. 8-2 roʻyxati `1`, `2` va `3` qiymatlariga ega boʻlgan yangi `Vec<i32>`ni yaratadi. Butun son turi `i32` dir, chunki bu standart butun son turi, biz 3-bobning ["Ma'lumotlar turlari"][data-types]<!-- ignore --> bo'limida muhokama qilganimizdek.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-02/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-2: Creating a new vector containing
-values</span>
+<span class="caption">Ro'yxat 8-2: qiymatlarni o'z ichiga olgan yangi vector yaratish</span>
 
-Because we’ve given initial `i32` values, Rust can infer that the type of `v`
-is `Vec<i32>`, and the type annotation isn’t necessary. Next, we’ll look at how
-to modify a vector.
+Biz boshlang‘ich `i32` qiymatlarini berganimiz sababli, Rust `v` turi `Vec<i32>` ekanligini va tur izohi shart emas degan xulosaga kelishi mumkin. Keyinchalik vectorni qanday o'zgartirishni ko'rib chiqamiz.
 
-### Updating a Vector
+### Vectorni yangilash
 
-To create a vector and then add elements to it, we can use the `push` method,
-as shown in Listing 8-3.
+Vector yaratish va unga elementlar qo'shish uchun biz 8-3 ro'yxatda ko'rsatilganidek, `push` metodidan foydalanishimiz mumkin.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-03/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-3: Using the `push` method to add values to a
-vector</span>
+<span class="caption">Ro'yxat 8-3: vectorga qiymatlar qo'shish uchun `push` metodidan foydalanish</span>
 
-As with any variable, if we want to be able to change its value, we need to
-make it mutable using the `mut` keyword, as discussed in Chapter 3. The numbers
-we place inside are all of type `i32`, and Rust infers this from the data, so
-we don’t need the `Vec<i32>` annotation.
+Har qanday o'zgaruvchida bo'lgani kabi, agar biz uning qiymatini o'zgartirish imkoniyatiga ega bo'lishni istasak, 3-bobda muhokama qilinganimizdek, `mut` kalit so'zidan foydalanib, uni o'zgaruvchan qilishimiz kerak. Biz joylashtirgan raqamlarning barchasi `i32` turiga kiradi va Rust buni maʼlumotlardan chiqaradi, shuning uchun bizga `Vec<i32>` annotationi kerak emas.
 
-### Reading Elements of Vectors
+### Vector elementlarini o'qish
 
-There are two ways to reference a value stored in a vector: via indexing or
-using the `get` method. In the following examples, we’ve annotated the types of
-the values that are returned from these functions for extra clarity.
+Vectorda saqlangan qiymatga murojaat qilishning ikki yo'li mavjud: indekslash yoki `get` metodi yordamida. Quyidagi misollarda biz qo'shimcha aniqlik uchun ushbu funksiyalardan qaytariladigan qiymatlar turlarini izohladik.
 
-Listing 8-4 shows both methods of accessing a value in a vector, with indexing
-syntax and the `get` method.
+8-4 ro'yxatda indekslash sintaksisi va `get` metodi bilan vectordagi qiymatga kirishning ikkala usuli ko'rsatilgan.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-04/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-4: Using indexing syntax or the `get` method to
-access an item in a vector</span>
+<span class="caption">Ro'yxat 8-4: Vectordagi elementga kirish uchun indekslash sintaksisi yoki `get` metodidan foydalanish</span>
 
-Note a few details here. We use the index value of `2` to get the third element
-because vectors are indexed by number, starting at zero. Using `&` and `[]`
-gives us a reference to the element at the index value. When we use the `get`
-method with the index passed as an argument, we get an `Option<&T>` that we can
-use with `match`.
+Bu erda bir nechta detallarga e'tibor bering. Uchinchi elementni olish uchun `2` indeks qiymatidan foydalanamiz, chunki vectorlar noldan boshlab raqamlar boʻyicha indekslanadi. `&` va `[]` dan foydalanish bizga indeks qiymatidagi elementga reference beradi. Argument sifatida berilgan indeks bilan `get` metodidan  foydalansak, biz `match` bilan foydalanishimiz mumkin bo'lgan `Option<&T>`ni olamiz.
 
-The reason Rust provides these two ways to reference an element is so you can
-choose how the program behaves when you try to use an index value outside the
-range of existing elements. As an example, let’s see what happens when we have
-a vector of five elements and then we try to access an element at index 100
-with each technique, as shown in Listing 8-5.
+Rust elementga reference qilishning ushbu ikki usulini taqdim etishining sababi shundaki, siz mavjud elementlar doirasidan tashqarida indeks qiymatidan foydalanmoqchi bo'lganingizda dastur qanday harakat qilishini tanlashingiz mumkin. Misol sifatida, keling, besh elementli vectorga ega bo'lganimizda nima sodir bo'lishini ko'rib chiqamiz va keyin 8-5 ro'yxatda ko'rsatilganidek, har bir texnikada 100 indeksidagi elementga kirishga harakat qilamiz.
 
 ```rust,should_panic,panics
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-05/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-5: Attempting to access the element at index
-100 in a vector containing five elements</span>
+<span class="caption">Ro'yxat 8-5: besh elementni o'z ichiga olgan vectorda 100 indeksidagi elementga kirishga urinish</span>
 
-When we run this code, the first `[]` method will cause the program to panic
-because it references a nonexistent element. This method is best used when you
-want your program to crash if there’s an attempt to access an element past the
-end of the vector.
+Ushbu kodni ishga tushirganimizda, birinchi `[]` metodi dasturda panic chiqaradi, chunki u mavjud bo'lmagan elementga murojaat qiladi. Ushbu usul vector oxiridan o'tgan elementga kirishga urinish bo'lsa, dasturingiz ishdan chiqishini xohlasangiz yaxshi qo'llaniladi.
 
-When the `get` method is passed an index that is outside the vector, it returns
-`None` without panicking. You would use this method if accessing an element
-beyond the range of the vector may happen occasionally under normal
-circumstances. Your code will then have logic to handle having either
-`Some(&element)` or `None`, as discussed in Chapter 6. For example, the index
-could be coming from a person entering a number. If they accidentally enter a
-number that’s too large and the program gets a `None` value, you could tell the
-user how many items are in the current vector and give them another chance to
-enter a valid value. That would be more user-friendly than crashing the program
-due to a typo!
+`get` metodi vektordan tashqaridagi indeksdan o'tganda, panic qo'ymasdan  `None`ni qaytaradi. Vector doirasidan tashqaridagi elementga kirish vaqti-vaqti bilan oddiy sharoitlarda sodir bo'lishi mumkin bo'lsa, siz ushbu usuldan foydalanasiz. Keyin sizning kodingiz 6-bobda muhokama qilinganidek, `Some(&element)`  yoki `None`ga ega bo'lish mantiqiga ega bo'ladi.Misol uchun, indeks raqamni kiritgan odamdan kelib chiqishi mumkin. Agar ular tasodifan juda katta raqamni kiritsa va dastur  `None` qiymatiga ega bo'lsa, siz foydalanuvchiga joriy vectorda nechta element borligini aytishingiz va ularga to'g'ri qiymat kiritish uchun yana bir imkoniyat berishingiz mumkin.Bu imlo xatosi tufayli dasturni buzishdan ko'ra foydalanuvchilar uchun qulayroq bo'lar edi!
 
-When the program has a valid reference, the borrow checker enforces the
-ownership and borrowing rules (covered in Chapter 4) to ensure this reference
-and any other references to the contents of the vector remain valid. Recall the
-rule that states you can’t have mutable and immutable references in the same
-scope. That rule applies in Listing 8-6, where we hold an immutable reference
-to the first element in a vector and try to add an element to the end. This
-program won’t work if we also try to refer to that element later in the
-function:
+Dasturda tegishli reference mavjud bo'lsa, borrow tekshiruvi ushbu reference va vector mazmuniga boshqa har qanday referencelar haqiqiyligini ta'minlash uchun ownership va borrowing qoidalarini (4-bobda ko'rsatilgan) amalga oshiradi. Bir xil doirada o'zgaruvchan va o'zgarmas referencelarga ega bo'lolmaysiz degan qoidani eslang. Ushbu qoida 8-6 ro'yxatda qo'llaniladi, bu yerda biz vectordagi birinchi elementga o'zgarmas referenceni ushlab turamiz va elementni oxiriga qo'shishga harakat qilamiz. Agar biz ushbu elementga keyinroq funksiyada murojaat qilsak, bu dastur ishlamaydi:
 
 
 ```rust,ignore,does_not_compile
