@@ -1,236 +1,148 @@
-## Storing UTF-8 Encoded Text with Strings
+## UTF-8 kodlangan matnni String bilan saqlash
 
-We talked about strings in Chapter 4, but we’ll look at them in more depth now.
-New Rustaceans commonly get stuck on strings for a combination of three
-reasons: Rust’s propensity for exposing possible errors, strings being a more
-complicated data structure than many programmers give them credit for, and
-UTF-8. These factors combine in a way that can seem difficult when you’re
-coming from other programming languages.
+Biz 4-bobda stringlar haqida gapirgan edik, ammo hozir ularni batafsil ko'rib chiqamiz.
+Yangi Rustaceanlar odatda uchta sababning kombinatsiyasiga ko'ra stringlarga yopishib qolishadi: Rustning mumkin bo'lgan xatolarni ochishga moyilligi, stringlar ko'plab dasturchilar tushunganidan ko'ra murakkabroq ma'lumotlar tuzilishi va UTF-8. Bu omillar shunday birlashadiki, agar siz boshqa dasturlash tillaridan kelgan bo'lsangiz, mavzu murakkab ko'rinishi mumkin.
 
-We discuss strings in the context of collections because strings are
-implemented as a collection of bytes, plus some methods to provide useful
-functionality when those bytes are interpreted as text. In this section, we’ll
-talk about the operations on `String` that every collection type has, such as
-creating, updating, and reading. We’ll also discuss the ways in which `String`
-is different from the other collections, namely how indexing into a `String` is
-complicated by the differences between how people and computers interpret
-`String` data.
+To'plamlar kontekstida stringlarni muhokama qilish foydalidir, chunki stringlar baytlar to'plami sifatida amalga oshiriladi, shuningdek, bu baytlar matn sifatida talqin qilinganda foydali funksiyalarni ta'minlashning ba'zi usullari. Ushbu bo'limda biz `String` bo'yicha har bir to'plam turiga ega bo'lgan yaratish, yangilash va o'qish kabi operatsiyalar haqida gapiramiz. Shuningdek, biz `String` ning boshqa to'plamlardan qanday farq qilishini, ya'ni `String` ga indekslash odamlar va kompyuterlarning `String` ma'lumotlarini qanday talqin qilishlari o'rtasidagi farqlar tufayli qanday murakkablashishini muhokama qilamiz.
 
-### What Is a String?
+### String nima?
 
-We’ll first define what we mean by the term *string*. Rust has only one string
-type in the core language, which is the string slice `str` that is usually seen
-in its borrowed form `&str`. In Chapter 4, we talked about *string slices*,
-which are references to some UTF-8 encoded string data stored elsewhere. String
-literals, for example, are stored in the program’s binary and are therefore
-string slices.
+Biz birinchi navbatda *string* atamasi bilan nimani nazarda tutayotganimizni aniqlaymiz. Rust asosiy tilda faqat bitta string turiga ega, bu `str` qator slice boʻlib, odatda uning `&str` shaklida koʻrinadi. 4-bobda biz boshqa joyda saqlangan ba'zi UTF-8 kodlangan string ma'lumotlariga referencelar bo'lgan *string slicelar* haqida gaplashdik. Masalan, satr literallari dasturning binary tizimida saqlanadi va shuning uchun satr slicedir.
 
-The `String` type, which is provided by Rust’s standard library rather than
-coded into the core language, is a growable, mutable, owned, UTF-8 encoded
-string type. When Rustaceans refer to “strings” in Rust, they might be
-referring to either the `String` or the string slice `&str` types, not just one
-of those types. Although this section is largely about `String`, both types are
-used heavily in Rust’s standard library, and both `String` and string slices
-are UTF-8 encoded.
+Rust standart kutubxonasi tomonidan taqdim etilgan `String` turi asosiy tilga o'rnatilmagan va kengaytiriladigan, o'zgaruvchan, ega bo'lgan, UTF-8 kodlangan string turidir. Rustaceanlar Rust tilidagi "stringlar" ga murojaat qilganda, ular bu turlardan birini emas, balki `String` yoki string slice `&str` turlarini nazarda tutishi mumkin. Garchi bu bo'lim asosan String haqida bo'lsa-da, ikkala tur ham Rust standart kutubxonasida ko'p qo'llaniladi, `String` va string slicelari UTF-8 da kodlangan.
 
-### Creating a New String
+### Yangi String yaratish
 
-Many of the same operations available with `Vec<T>` are available with `String`
-as well, because `String` is actually implemented as a wrapper around a vector
-of bytes with some extra guarantees, restrictions, and capabilities. An example
-of a function that works the same way with `Vec<T>` and `String` is the `new`
-function to create an instance, shown in Listing 8-11.
+`Vec<T>` bilan mavjud bo'lgan bir xil amallarning ko'pchiligi `String` bilan ham mavjud, chunki `String` aslida qo'shimcha kafolatlar, cheklovlar va imkoniyatlarga ega baytlar vectori atrofida o'rash sifatida amalga oshiriladi. `Vec<T>` va `String` bilan bir xil ishlaydigan funksiyaga misol qilib, 8-11 ro'yxatda ko'rsatilgan yangi turdagi misolni yaratuvchi `new` funksiyadir.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-11/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-11: Creating a new, empty `String`</span>
+<span class="caption">Ro'yxat 8-11: Yangi, bo'sh `String` yaratish</span>
 
-This line creates a new empty string called `s`, which we can then load data
-into. Often, we’ll have some initial data that we want to start the string
-with. For that, we use the `to_string` method, which is available on any type
-that implements the `Display` trait, as string literals do. Listing 8-12 shows
-two examples.
+Ushbu satr `s` deb nomlangan yangi bo'sh qatorni yaratadi, biz keyin unga ma'lumotlarni yuklashimiz mumkin. Ko'pincha, biz stringni boshlamoqchi bo'lgan dastlabki ma'lumotlarga ega bo'lamiz. Buning uchun biz string literallari kabi `Display` traittini amalga oshiradigan har qanday turda mavjud bo'lgan `to_string` metotidan foydalanamiz. Ro'yxat 8-12 ikkita misolni ko'rsatadi.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-12/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-12: Using the `to_string` method to create a
-`String` from a string literal</span>
+<span class="caption">Ro'yxat 8-12: string literalidan `String` yaratish uchun `to_string` metodidan foydalanish</span>
 
-This code creates a string containing `initial contents`.
+Bu kod `dastlabki tarkib`ni o‘z ichiga olgan stringni yaratadi.
 
-We can also use the function `String::from` to create a `String` from a string
-literal. The code in Listing 8-13 is equivalent to the code from Listing 8-12
-that uses `to_string`.
+Satr literalidan `String` yaratish uchun `String::from` funksiyasidan ham foydalanishimiz mumkin. 8-13 ro'yxatdagi kod `to_string` funksiyasidan foydalanadigan 8-12 ro'yxatdagi kodga teng:
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-13/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-13: Using the `String::from` function to create
-a `String` from a string literal</span>
+<span class="caption">Ro'yxat 8-13: string literalidan `String` yaratish uchun `String::from` funksiyasidan foydalanish</span>
 
-Because strings are used for so many things, we can use many different generic
-APIs for strings, providing us with a lot of options. Some of them can seem
-redundant, but they all have their place! In this case, `String::from` and
-`to_string` do the same thing, so which you choose is a matter of style and
-readability.
+Stringlar juda ko'p narsalar uchun ishlatilganligi sababli, biz stringlar uchun juda ko'p turli xil umumiy API'lardan foydalanishimiz mumkin, bu bizga juda ko'p imkoniyatlarni taqdim etadi. Ulardan ba'zilari ortiqcha bo'lib tuyulishi mumkin, ammo ularning barchasi o'z joylariga ega! Bunday holda, `String::from` va `to_string` bir xil ishni bajaradi, shuning uchun tanlov sizga eng yoqqan uslubga bog'liq.
 
-Remember that strings are UTF-8 encoded, so we can include any properly encoded
-data in them, as shown in Listing 8-14.
+Yodda tutingki, stringlar UTF-8 bilan kodlangan, shuning uchun 8-14 ro'yxatda ko'rsatilganidek, biz ularga har qanday to'g'ri kodlangan ma'lumotlarni kiritishimiz mumkin.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-14/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-14: Storing greetings in different languages in
-strings</span>
+<span class="caption">Ro'yxat 8-14: Salom so'zini turli tillarda stringlarda saqlash</span>
 
-All of these are valid `String` values.
+Bularning barchasi yaroqli `String` qiymatlari.
 
-### Updating a String
+### Stringni yangilash
 
-A `String` can grow in size and its contents can change, just like the contents
-of a `Vec<T>`, if you push more data into it. In addition, you can conveniently
-use the `+` operator or the `format!` macro to concatenate `String` values.
+Agar siz unga ko'proq ma'lumot kiritsangiz, `String` hajmi kattalashishi mumkin va uning tarkibi `Vec<T>` tarkibidagi kabi o'zgarishi mumkin. Bundan tashqari, `String` qiymatlarini birlashtirish uchun `+` operatori yoki `format!` makrosidan qulay foydalanish mumkin.
 
-#### Appending to a String with `push_str` and `push`
+#### `push_str` va `push` yordamida stringga biriktirish
 
-We can grow a `String` by using the `push_str` method to append a string slice,
-as shown in Listing 8-15.
+Biz 8-15 roʻyxatda koʻrsatilganidek, string boʻlagini qoʻshish uchun `push_str` metodidan foydalanib `String`ni kengaytirishimiz mumkin.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-15/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-15: Appending a string slice to a `String`
-using the `push_str` method</span>
+<span class="caption">Roʻyxat 8-15: `push_str` metodi yordamida `String` ga satr boʻlagini qoʻshish</span>
 
-After these two lines, `s` will contain `foobar`. The `push_str` method takes a
-string slice because we don’t necessarily want to take ownership of the
-parameter. For example, in the code in Listing 8-16, we want to be able to use
-`s2` after appending its contents to `s1`.
+Ushbu ikki qatordan keyin `s` tarkibida `dasturchi` bo'ladi. `push_str` metodi string bo'lagini oladi, chunki biz parametrga egalik qilishni xohlamaymiz. Masalan, 8-16 roʻyxatdagi kodda biz uning mazmunini `s1` ga qoʻshgandan soʻng `s2` dan foydalanish imkoniyatiga ega boʻlishni xohlaymiz.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-16/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-16: Using a string slice after appending its
-contents to a `String`</span>
+<span class="caption">Ro'yxat 8-16: Tarkibni `String` ga qo'shgandan so'ng, string bo'lagidan foydalanish</span>
 
-If the `push_str` method took ownership of `s2`, we wouldn’t be able to print
-its value on the last line. However, this code works as we’d expect!
+Agar `push_str` metodi `s2` ga egalik qilgan bo‘lsa, biz uning qiymatini oxirgi satrda chop eta olmaymiz. Biroq, bu kod biz kutgandek ishlaydi!
 
-The `push` method takes a single character as a parameter and adds it to the
-`String`. Listing 8-17 adds the letter “l” to a `String` using the `push`
-method.
+`push` metodi parametr sifatida bitta belgini oladi va uni `String` ga qo'shadi. 8-17 ro'yxatda `push` metodi yordamida `String` ga `v` harfi qo'shiladi.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-17/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-17: Adding one character to a `String` value
-using `push`</span>
+<span class="caption">Roʻyxat 8-17: `push` yordamida `String` qiymatiga bitta belgi qoʻshish</span>
 
-As a result, `s` will contain `lol`.
+Natijada, `s` tarkibida `suv` bo'ladi.
 
-#### Concatenation with the `+` Operator or the `format!` Macro
+#### `+` operatori yoki `format!` makrosidan foydalanib satrlarni birlashtirish
 
-Often, you’ll want to combine two existing strings. One way to do so is to use
-the `+` operator, as shown in Listing 8-18.
+Ko'pincha siz ikkita mavjud satrni birlashtirishni xohlaysiz. Buning usullaridan biri 8-18 ro'yxatda ko'rsatilganidek, `+` operatoridan foydalanishdir.
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-18/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-18: Using the `+` operator to combine two
-`String` values into a new `String` value</span>
+<span class="caption">Roʻyxat 8-18: Ikkita `String` qiymatini yangi `String` qiymatiga birlashtirish uchun `+` operatoridan foydalanish</span>
 
-The string `s3` will contain `Hello, world!`. The reason `s1` is no longer
-valid after the addition, and the reason we used a reference to `s2`, has to do
-with the signature of the method that’s called when we use the `+` operator.
-The `+` operator uses the `add` method, whose signature looks something like
-this:
+`s3` qatorida `Salom, Rust!` bo'ladi. Qo‘shishdan keyin `s1` ning endi haqiqiy emasligi va `s2`ga referenceni qo‘llaganimiz sababi `+` operatoridan foydalanganda chaqirilayotgan metodning imzosi bilan bog‘liq.
+`+` operatori `add` metodidan foydalanadi, uning imzosi quyidagicha ko'rinadi:
 
 ```rust,ignore
 fn add(self, s: &str) -> String {
 ```
 
-In the standard library, you'll see `add` defined using generics and associated
-types. Here, we’ve substituted in concrete types, which is what happens when we
-call this method with `String` values. We’ll discuss generics in Chapter 10.
-This signature gives us the clues we need to understand the tricky bits of the
-`+` operator.
+Standart kutubxonada siz umumiy va tegishli turlar yordamida aniqlangan `add`ni ko'rasiz. Bu erda biz aniq turlarni almashtirdik, bu metodni `String` qiymatlari bilan chaqirganimizda sodir bo'ladi. Biz 10-bobda generiklarni muhokama qilamiz.
+Ushbu imzo bizga `+` operatorining murakkab bitlarini tushunishimiz kerak bo'lgan maslahatlarni beradi.
 
-First, `s2` has an `&`, meaning that we’re adding a *reference* of the second
-string to the first string. This is because of the `s` parameter in the `add`
-function: we can only add a `&str` to a `String`; we can’t add two `String`
-values together. But wait—the type of `&s2` is `&String`, not `&str`, as
-specified in the second parameter to `add`. So why does Listing 8-18 compile?
+Birinchidan, `s2` `&` belgisiga ega, ya'ni biz birinchi satrga ikkinchi satrning *reference*ni qo'shmoqdamiz. Buning sababi `add` funksiyasidagi `s` parametri: biz faqat `String`ga `&str` qo'shishimiz mumkin; biz ikkita `String` qiymatini qo'sha olmaymiz. Lekin kuting – `&s2` turi `add` uchun ikkinchi parametrda ko‘rsatilganidek, `&str` emas, `&String`dir. Xo'sh, nima uchun 8-18 ro'yxatdagi kod kompilyatsiya bo'ladi?
 
-The reason we’re able to use `&s2` in the call to `add` is that the compiler
-can *coerce* the `&String` argument into a `&str`. When we call the `add`
-method, Rust uses a *deref coercion*, which here turns `&s2` into `&s2[..]`.
-We’ll discuss deref coercion in more depth in Chapter 15. Because `add` does
-not take ownership of the `s` parameter, `s2` will still be a valid `String`
-after this operation.
+`add` chaqiruvida `&s2` dan foydalanishimiz sababi shundaki, kompilyator `&String` argumentini `&str` ga *majburlashi(coerce)* mumkin. Biz `add` metodini chaqirganimizda Rust *deref coercion* dan foydalanadi, bu erda `&s2` ni `&s2[..]` ga aylantiradi.
+Biz 15-bobda coercion haqida batafsilroq gaplashamiz. `add` `s` parametriga egalik qilmaganligi sababli, `s2` bu amaldan keyin ham haqiqiy `String` bo'lib qoladi.
 
-Second, we can see in the signature that `add` takes ownership of `self`,
-because `self` does *not* have an `&`. This means `s1` in Listing 8-18 will be
-moved into the `add` call and will no longer be valid after that. So although
-`let s3 = s1 + &s2;` looks like it will copy both strings and create a new one,
-this statement actually takes ownership of `s1`, appends a copy of the contents
-of `s2`, and then returns ownership of the result. In other words, it looks
-like it’s making a lot of copies but isn’t; the implementation is more
-efficient than copying.
+Ikkinchidan, imzoda `add` `self` egalik qilishini ko'rishimiz mumkin, chunki `self`da `&` *yo'q*. Bu shuni anglatadiki, 8-18-sonli ro'yxatdagi `s1` `add` chaqiruviga o'tkaziladi va bundan keyin endi yaroqsiz bo'ladi. Shunday qilib, `let s3 = s1 + &s2;` har ikkala satrdan nusxa ko'chiradigan va yangisini yaratadiganga o'xshasa-da, bu statement aslida `s1`ga egalik qiladi va `s2` mazmunining nusxasini qo'shadi, va keyin natijaga egalik huquqini qaytaradi. Boshqacha qilib aytganda, u juda ko'p nusxa ko'chirayotganga o'xshaydi, lekin unday emas; implement qilish nusxalashdan ko'ra samaraliroq.
 
-If we need to concatenate multiple strings, the behavior of the `+` operator
-gets unwieldy:
+Agar biz bir nechta satrlarni birlashtirishimiz kerak bo'lsa, `+` operatorining xatti-harakati noqulay bo'ladi:
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/no-listing-01-concat-multiple-strings/src/main.rs:here}}
 ```
 
-At this point, `s` will be `tic-tac-toe`. With all of the `+` and `"`
-characters, it’s difficult to see what’s going on. For more complicated string
-combining, we can instead use the `format!` macro:
+Bu vaqtda `s` `tic-tac-toe` bo'ladi. Barcha `+` va `"` belgilar bilan nima sodir bo'layotganini ko'rish qiyin. Murakkab qatorlarni birlashtirish uchun biz `format!` makrosidan foydalanishimiz mumkin:
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/no-listing-02-format/src/main.rs:here}}
 ```
 
-This code also sets `s` to `tic-tac-toe`. The `format!` macro works like
-`println!`, but instead of printing the output to the screen, it returns a
-`String` with the contents. The version of the code using `format!` is much
-easier to read, and the code generated by the `format!` macro uses references
-so that this call doesn’t take ownership of any of its parameters.
+Ushbu kod `s` ni `tic-tac-toe` ga ham o'rnatadi. `format!` makrosi `println!` kabi ishlaydi, lekin natijani ekranga chop etish o'rniga mazmuni bilan `String`ni qaytaradi. Kodning `format!` dan foydalanilgan versiyasini o‘qish ancha oson va `format!` makrosi tomonidan yaratilgan kod bu chaqiruv uning parametrlaridan birortasiga egalik qilmasligi uchun havolalardan foydalanadi.
 
-### Indexing into Strings
+### Stringlarni indekslash
 
-In many other programming languages, accessing individual characters in a
-string by referencing them by index is a valid and common operation. However,
-if you try to access parts of a `String` using indexing syntax in Rust, you’ll
-get an error. Consider the invalid code in Listing 8-19.
+Ko'pgina boshqa dasturlash tillarida stringdagi alohida belgilarga indeks bo'yicha murojaat qilish orqali kirish to'g'ri va keng tarqalgan operatsiya hisoblanadi. Biroq, agar siz Rust-da indekslash sintaksisidan foydalanib, `String` qismlariga kirishga harakat qilsangiz, xatoga duch kelasiz. 8-19 ro'yxatdagi noto'g'ri kodni ko'rib chiqing.
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-19/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 8-19: Attempting to use indexing syntax with a
-String</span>
+<span class="caption">Ro'yxat 8-19: String bilan indekslash sintaksisidan foydalanishga urinish</span>
 
-This code will result in the following error:
+Ushbu kod quyidagi xatoga olib keladi:
 
 ```console
 {{#include ../listings/ch08-common-collections/listing-08-19/output.txt}}
 ```
 
-The error and the note tell the story: Rust strings don’t support indexing. But
-why not? To answer that question, we need to discuss how Rust stores strings in
-memory.
+Xato va eslatma Rust indekslashni qo'llab-quvvatlamasligini aytadi. Lekin nega yo'q? Bu savolga javob berish uchun Rust stringlarni xotirada qanday saqlashini muhokama qilishimiz kerak.
 
 #### Internal Representation
 
