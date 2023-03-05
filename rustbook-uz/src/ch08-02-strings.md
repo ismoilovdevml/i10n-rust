@@ -144,126 +144,84 @@ Ushbu kod quyidagi xatoga olib keladi:
 
 Xato va eslatma Rust indekslashni qo'llab-quvvatlamasligini aytadi. Lekin nega yo'q? Bu savolga javob berish uchun Rust stringlarni xotirada qanday saqlashini muhokama qilishimiz kerak.
 
-#### Internal Representation
+#### Ichki vakillik
 
-A `String` is a wrapper over a `Vec<u8>`. Let’s look at some of our properly
-encoded UTF-8 example strings from Listing 8-14. First, this one:
+`String` turi - bu `Vec<u8>` turidagi wrapper. Keling, 8-14 ro'yxatdagi to'g'ri kodlangan UTF-8 misol stringlarini ko'rib chiqaylik. Birinchidan, bu:
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-14/src/main.rs:spanish}}
 ```
 
-In this case, `len` will be 4, which means the vector storing the string “Hola”
-is 4 bytes long. Each of these letters takes 1 byte when encoded in UTF-8. The
-following line, however, may surprise you. (Note that this string begins with
-the capital Cyrillic letter Ze, not the Arabic number 3.)
+Bunday holda, `len` 4 bo'ladi, ya'ni "Hola" qatorini saqlaydigan vektor 4 bayt uzunlikda. Bu harflarning har biri UTF-8 da kodlanganda 1 baytni oladi. Biroq, keyingi qator sizni hayratda qoldirishi mumkin. (E'tibor bering, bu qator arabcha 3 raqami emas, kirill alifbosining bosh harfi Ze bilan boshlanadi.)
 
 ```rust
 {{#rustdoc_include ../listings/ch08-common-collections/listing-08-14/src/main.rs:russian}}
 ```
 
-Asked how long the string is, you might say 12. In fact, Rust’s answer is 24:
-that’s the number of bytes it takes to encode “Здравствуйте” in UTF-8, because
-each Unicode scalar value in that string takes 2 bytes of storage. Therefore,
-an index into the string’s bytes will not always correlate to a valid Unicode
-scalar value. To demonstrate, consider this invalid Rust code:
+String uzunligi so'ralganda, siz 12 deb aytishingiz mumkin. Aslida, Rustning javobi 24: bu UTF 8 da “Здравствуйте” ni kodlash uchun zarur bo'lgan baytlar soni, chunki bu satrdagi har bir Unicode skalyar qiymati 2 bayt xotirani oladi. Shuning uchun, satr baytlaridagi indeks har doim ham haqiqiy Unicode skalyar qiymatiga mos kelmaydi. Namoyish qilish uchun ushbu yaroqsiz Rust kodini ko'rib chiqing:
 
 ```rust,ignore,does_not_compile
-let hello = "Здравствуйте";
-let answer = &hello[0];
+let salom = "Здравствуйте";
+let javob = &salom[0];
 ```
 
-You already know that `answer` will not be `З`, the first letter. When encoded
-in UTF-8, the first byte of `З` is `208` and the second is `151`, so it would
-seem that `answer` should in fact be `208`, but `208` is not a valid character
-on its own. Returning `208` is likely not what a user would want if they asked
-for the first letter of this string; however, that’s the only data that Rust
-has at byte index 0. Users generally don’t want the byte value returned, even
-if the string contains only Latin letters: if `&"hello"[0]` were valid code
-that returned the byte value, it would return `104`, not `h`.
+Siz allaqachon bilasizki, `javob` birinchi harf bo'lgan `З` bo'lmaydi. UTF-8 da kodlanganda, `З` birinchi bayti `208`, ikkinchisi esa `151`, shuning uchun `javob` aslida `208` bo'lishi kerakdek tuyuladi, lekin `208` o'z-o'zidan haqiqiy belgi emas. Agar foydalanuvchi ushbu qatorning birinchi harfini so'ragan bo'lsa, `208` ni qaytarish, ehtimol bu emas; ammo, bu Rust bayt indeksi 0 bo'lgan yagona ma'lumotdir. Foydalanuvchilar odatda bayt qiymatini qaytarishni xohlamaydilar, hatto satrda faqat lotin harflari bo‘lsa ham: agar `&“hello”[0]` bayt qiymatini qaytaruvchi yaroqli kod bo‘lsa, u `h` emas, `104`ni qaytaradi. .
 
-The answer, then, is that to avoid returning an unexpected value and causing
-bugs that might not be discovered immediately, Rust doesn’t compile this code
-at all and prevents misunderstandings early in the development process.
+Javob shundaki, kutilmagan qiymatni qaytarmaslik va darhol topilmasligi mumkin bo'lgan xatolarni keltirib chiqarmaslik uchun Rust ushbu kodni umuman kompilyatsiya qilmaydi va ishlab chiqish jarayonida tushunmovchiliklarning oldini oladi.
 
-#### Bytes and Scalar Values and Grapheme Clusters! Oh My!
+#### Baytlar va skalyar qiymatlar va grafema klasterlari!
 
-Another point about UTF-8 is that there are actually three relevant ways to
-look at strings from Rust’s perspective: as bytes, scalar values, and grapheme
-clusters (the closest thing to what we would call *letters*).
+UTF-8 bilan bog'liq yana bir nuqta shundaki, Rust nuqtai nazaridan satrlarga qarashning uchta mos usuli mavjud: baytlar, skalyar qiymatlar va grafema klasterlari (biz *harflar* deb ataydigan narsaga eng yaqin narsa).
 
-If we look at the Hindi word “नमस्ते” written in the Devanagari script, it is
-stored as a vector of `u8` values that looks like this:
+Devanagari skriptida yozilgan hindcha “नमस्ते” so'ziga qarasak, u `u8` qiymatlari vektori sifatida saqlanadi, bu quyidagicha ko'rinadi:
 
 ```text
 [224, 164, 168, 224, 164, 174, 224, 164, 184, 224, 165, 141, 224, 164, 164,
 224, 165, 135]
 ```
 
-That’s 18 bytes and is how computers ultimately store this data. If we look at
-them as Unicode scalar values, which are what Rust’s `char` type is, those
-bytes look like this:
+Bu 18 bayt va kompyuterlar oxir-oqibat bu ma'lumotlarni qanday saqlaydi. Agar biz ularni Rustning `char` turiga ega bo'lgan Unicode skalyar qiymatlari sifatida qarasak, bu baytlar quyidagicha ko'rinadi:
 
 ```text
 ['न', 'म', 'स', '्', 'त', 'े']
 ```
 
-There are six `char` values here, but the fourth and sixth are not letters:
-they’re diacritics that don’t make sense on their own. Finally, if we look at
-them as grapheme clusters, we’d get what a person would call the four letters
-that make up the Hindi word:
+Bu yerda oltita `char` qiymati bor, lekin to'rtinchi va oltinchi harflar emas: ular o'z-o'zidan ma'noga ega bo'lmagan diakritikdir. Nihoyat, agar baytlarni grafema klasterlari sifatida ko'rib chiqsak, inson to'rt harfli hindcha so'z deb ataydigan narsani olamiz:
 
 ```text
 ["न", "म", "स्", "ते"]
 ```
 
-Rust provides different ways of interpreting the raw string data that computers
-store so that each program can choose the interpretation it needs, no matter
-what human language the data is in.
+Rust kompyuterlar saqlaydigan ma'lumotlar qatorini talqin qilishning turli usullarini taqdim etadi, shunda ma'lumotlar qaysi inson tilida bo'lishidan qat'i nazar, har bir dastur kerakli talqinni tanlashi mumkin.
 
-A final reason Rust doesn’t allow us to index into a `String` to get a
-character is that indexing operations are expected to always take constant time
-(O(1)). But it isn’t possible to guarantee that performance with a `String`,
-because Rust would have to walk through the contents from the beginning to the
-index to determine how many valid characters there were.
+Rust bizga belgini olish uchun `String` ga indekslashga ruxsat bermasligining yakuniy sababi shundaki, indekslash operatsiyalari doimo konstanta(doimiy) vaqtni oladi (O(1)). Ammo `Strin`g bilan ishlashni kafolatlab bo‘lmaydi, chunki Rust qancha to‘g‘ri belgilar mavjudligini aniqlash uchun tarkibni boshidan indeksgacha bosib o‘tishi kerak edi.
 
-### Slicing Strings
+### String bo'laklari
 
-Indexing into a string is often a bad idea because it’s not clear what the
-return type of the string-indexing operation should be: a byte value, a
-character, a grapheme cluster, or a string slice. If you really need to use
-indices to create string slices, therefore, Rust asks you to be more specific.
+Satrni indekslash ko'pincha noto'g'ri fikrdir, chunki satrni indekslash operatsiyasining qaytish turi qanday bo'lishi kerakligi aniq emas: bayt qiymati, belgi, grafema klasteri yoki satr bo'lagi. Agar chindan ham string bo'laklarini yaratish uchun indekslardan foydalanish kerak bo'lsa, Rust sizdan aniqroq bo'lishingizni so'raydi.
 
-Rather than indexing using `[]` with a single number, you can use `[]` with a
-range to create a string slice containing particular bytes:
+Bitta raqam bilan `[]` yordamida indeksatsiya qilish o'rniga, muayyan baytlarni o'z ichiga olgan string bo'laklarini yaratish uchun diapazon bilan `[]` dan foydalanishingiz mumkin:
 
 ```rust
-let hello = "Здравствуйте";
+let salom = "Здравствуйте";
 
-let s = &hello[0..4];
+let s = &salom[0..4];
 ```
 
-Here, `s` will be a `&str` that contains the first 4 bytes of the string.
-Earlier, we mentioned that each of these characters was 2 bytes, which means
-`s` will be `Зд`.
+Bu erda `s` qatorning dastlabki 4 baytini o'z ichiga olgan `&str` bo'ladi.
+Avvalroq, biz ushbu belgilarning har biri 2 baytdan iborat bo'lganligini aytib o'tgan edik, ya'ni `s` `Зд` bo'ladi.
 
-If we were to try to slice only part of a character’s bytes with something like
-`&hello[0..1]`, Rust would panic at runtime in the same way as if an invalid
-index were accessed in a vector:
+Agar biz `&salom[0..1]` kabi belgi baytlarining faqat bir qismini kesishga harakat qilsak, Rust ish runtimeda xuddi vektordagi yaroqsiz indeksga kirish kabi panic qo'yadi:
 
 ```console
 {{#include ../listings/ch08-common-collections/output-only-01-not-char-boundary/output.txt}}
 ```
 
-You should use ranges to create string slices with caution, because doing so
-can crash your program.
+Ehtiyotkorlik bilan string bo'laklarni yaratish uchun diapazonlardan foydalanishingiz kerak, chunki bu dasturni buzishi mumkin.
 
-### Methods for Iterating Over Strings
+### Stringlarni takrorlash usullari
 
-The best way to operate on pieces of strings is to be explicit about whether
-you want characters or bytes. For individual Unicode scalar values, use the
-`chars` method. Calling `chars` on “Зд” separates out and returns two values
-of type `char`, and you can iterate over the result to access each element:
+String bo'laklari bilan ishlashning eng yaxshi usuli - belgilar yoki baytlarni xohlaysizmi, aniq bo'lishdir. Unicode skalyar qiymatlari uchun `chars` metodidan foydalaning. “Зд” da `chars`ni chaqirish `char` turidagi ikkita qiymatni ajratib turadi va qaytaradi va har bir elementga kirish uchun natijani takrorlashingiz mumkin:
 
 ```rust
 for c in "Зд".chars() {
@@ -271,15 +229,14 @@ for c in "Зд".chars() {
 }
 ```
 
-This code will print the following:
+Ushbu kod quyidagilarni chop etadi:
 
 ```text
 З
 д
 ```
 
-Alternatively, the `bytes` method returns each raw byte, which might be
-appropriate for your domain:
+Shu bilan bir qatorda, `bytes` metodi boshqa domenga mos kelishi mumkin bo'lgan har bir baytni qaytaradi:
 
 ```rust
 for b in "Зд".bytes() {
@@ -287,7 +244,7 @@ for b in "Зд".bytes() {
 }
 ```
 
-This code will print the four bytes that make up this string:
+Ushbu kod ushbu satrni tashkil etuvchi to'rt baytni chop etadi:
 
 ```text
 208
@@ -296,29 +253,14 @@ This code will print the four bytes that make up this string:
 180
 ```
 
-But be sure to remember that valid Unicode scalar values may be made up of more
-than 1 byte.
+Lekin esda tutingki, joriy Unicode skalyar qiymatlari 1 baytdan ortiq bo'lishi mumkin.
 
-Getting grapheme clusters from strings as with the Devanagari script is
-complex, so this functionality is not provided by the standard library. Crates
-are available on [crates.io](https://crates.io/)<!-- ignore --> if this is the
-functionality you need.
+Devanagari skriptidagi kabi satrlardan grafema klasterlarini olish juda murakkab, shuning uchun bu funksiya standart kutubxona tomonidan ta'minlanmagan. Agar sizga ushbu funksiya kerak bo'lsa, [crates.io](https://crates.io/)<!-- ignore --> saytida cratelar mavjud.
 
-### Strings Are Not So Simple
+### Stringlar unchalik oddiy emas
 
-To summarize, strings are complicated. Different programming languages make
-different choices about how to present this complexity to the programmer. Rust
-has chosen to make the correct handling of `String` data the default behavior
-for all Rust programs, which means programmers have to put more thought into
-handling UTF-8 data upfront. This trade-off exposes more of the complexity of
-strings than is apparent in other programming languages, but it prevents you
-from having to handle errors involving non-ASCII characters later in your
-development life cycle.
+Xulosa qilib aytganda, satrlar murakkab. Turli xil dasturlash tillari ushbu murakkablikni dasturchiga qanday taqdim etish bo'yicha turli xil tanlovlar qiladi. Rust `String` ma'lumotlarini to'g'ri ishlashni barcha Rust dasturlari uchun standart xatti-harakatga aylantirishni tanladi, bu esa dasturchilar UTF-8 ma'lumotlari bilan ishlash haqida oldindan ko'proq o'ylashlari kerakligini anglatadi. Ushbu o'zaro kelishuv boshqa dasturlash tillarida ko'rinadiganidan ko'ra ko'proq stringlarning murakkabligini ochib beradi, lekin keyinchalik ishlab chiqish jarayonida paydo bo'lishi mumkin bo'lgan ASCII bo'lmagan belgilar xatolarini qayta ishlash zaruratini oldini oladi.
 
-The good news is that the standard library offers a lot of functionality built
-off the `String` and `&str` types to help handle these complex situations
-correctly. Be sure to check out the documentation for useful methods like
-`contains` for searching in a string and `replace` for substituting parts of a
-string with another string.
+Yaxshi xabar shundaki, standart kutubxona ushbu murakkab vaziyatlarni to'g'ri hal qilishga yordam beradigan `String` va `&str` turlaridan iborat ko'plab funksiyalarni taklif etadi. Satrda qidirish uchun `contains` va qator qismlarini boshqa satr bilan almashtirish uchun `replace` kabi foydali metodlar uchun texnik hujjatlarni ko'rib chiqing.
 
-Let’s switch to something a bit less complex: hash maps!
+Keling, biroz murakkabroq narsaga o'taylik: HashMap!
