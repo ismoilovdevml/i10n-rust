@@ -1,14 +1,9 @@
-## Recoverable Errors with `Result`
+## `Result` bilan tiklanadigan xatolar
 
-Most errors aren’t serious enough to require the program to stop entirely.
-Sometimes, when a function fails, it’s for a reason that you can easily
-interpret and respond to. For example, if you try to open a file and that
-operation fails because the file doesn’t exist, you might want to create the
-file instead of terminating the process.
+Ko'pgina xatolar dasturni butunlay to'xtatishni talab qiladigan darajada jiddiy emas.
+Ba'zan, funksiya bajarilmasa, bu siz osongina talqin qilishingiz va javob berishingiz mumkin bo'lgan sababdir. Misol uchun, agar siz faylni ochishga urinib ko'rsangiz va fayl mavjud bo'lmagani uchun bu operatsiya bajarilmasa, jarayonni tugatish o'rniga faylni yaratishni xohlashingiz mumkin.
 
-Recall from [“Handling Potential Failure with `Result`”][handle_failure]<!--
-ignore --> in Chapter 2 that the `Result` enum is defined as having two
-variants, `Ok` and `Err`, as follows:
+2-bobdagi [“Potentsial muvaffaqiyatsizlikni `Result` bilan hal qilish”][handle_failure]<!-- ignore --> bo'limini eslang: biz u yerda muvaffaqiyatsizliklarni hal qilish uchun ikkita variantga ega bo'lgan `Ok` va `Err` varianti bo'lgan `Result` enumidan foydalanganmiz. Enumning o'zi quyidagicha aniqlanadi:
 
 ```rust
 enum Result<T, E> {
@@ -17,88 +12,51 @@ enum Result<T, E> {
 }
 ```
 
-The `T` and `E` are generic type parameters: we’ll discuss generics in more
-detail in Chapter 10. What you need to know right now is that `T` represents
-the type of the value that will be returned in a success case within the `Ok`
-variant, and `E` represents the type of the error that will be returned in a
-failure case within the `Err` variant. Because `Result` has these generic type
-parameters, we can use the `Result` type and the functions defined on it in
-many different situations where the successful value and error value we want to
-return may differ.
+`T` va `E` umumiy turdagi parametrlardir: biz generiklarni 10-bobda batafsilroq muhokama qilamiz. Siz hozir bilishingiz kerak bo'lgan narsa shundaki, `T` `Ok` variantida muvaffaqiyatli holatda qaytariladigan qiymat turini bildiradi, va `E` `Err`(Xato) variantida xatolik holatida qaytariladigan xato turini ifodalaydi. `Result`da ushbu umumiy turdagi parametrlar mavjud bo'lganligi sababli, biz qaytarmoqchi bo'lgan muvaffaqiyatli qiymat va xato qiymati har xil bo'lishi mumkin bo'lgan turli vaziyatlarda `Result` turidan va unda belgilangan funksiyalardan foydalanishimiz mumkin.
 
-Let’s call a function that returns a `Result` value because the function could
-fail. In Listing 9-3 we try to open a file.
+Keling, `Result` qiymatini qaytaruvchi funksiyani chaqiraylik, chunki funksiya bajarilmasligi mumkin. 9-3 ro'yxatda biz faylni ochishga harakat qilamiz.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-03/src/main.rs}}
 ```
 
-<span class="caption">Listing 9-3: Opening a file</span>
+<span class="caption">Ro'yxat 9-3: Faylni ochish</span>
 
-The return type of `File::open` is a `Result<T, E>`. The generic parameter `T`
-has been filled in by the implementation of `File::open` with the type of the
-success value, `std::fs::File`, which is a file handle. The type of `E` used in
-the error value is `std::io::Error`. This return type means the call to
-`File::open` might succeed and return a file handle that we can read from or
-write to. The function call also might fail: for example, the file might not
-exist, or we might not have permission to access the file. The `File::open`
-function needs to have a way to tell us whether it succeeded or failed and at
-the same time give us either the file handle or error information. This
-information is exactly what the `Result` enum conveys.
+`File::open` return(qaytish) turi `Result<T, E>`dir. `File::open`ni amalga oshirishdagi umumiy `T` turi muvaffaqiyatli qabul qilingan qiymat turiga, `std::fs::File`ga, ya'ni fayl deskriptoriga mos keladi. Xato qiymatida ishlatiladigan `E` turi `std::io::Error`. Qaytish(return) turi `File::open` ga chaqiruv muvaffaqiyatli bo'lishi va biz o'qishimiz yoki yozishimiz mumkin bo'lgan fayl handleni qaytarishi mumkinligini anglatadi. Funksiya chaqiruvi ham muvaffaqiyatsiz bo'lishi mumkin: masalan, fayl mavjud bo'lmasligi yoki faylga kirish uchun ruxsatimiz bo'lmasligi mumkin. `File::open` funksiyasi muvaffaqiyatli yoki muvaffaqiyatsiz bo'lganligini va bir vaqtning o'zida bizga fayl identifikatori yoki xato haqida ma'lumot beradigan metodga ega bo'lishi kerak. Ushbu ma'lumot aynan `Result` enumini bildiradi.
 
-In the case where `File::open` succeeds, the value in the variable
-`greeting_file_result` will be an instance of `Ok` that contains a file handle.
-In the case where it fails, the value in `greeting_file_result` will be an
-instance of `Err` that contains more information about the kind of error that
-happened.
+Agar `File::open` muvaffaqiyatli bo'lsa, `fayl_ochish` qiymati fayl identifikatorini o'z ichiga olgan `Ok` misoli bo'ladi.
+Muvaffaqiyatsiz bo'lgan taqdirda, `fayl_ochish` dagi qiymat `Err` misoli bo'lib, sodir bo'lgan xato turi haqida qo'shimcha ma'lumotni o'z ichiga oladi.
 
-We need to add to the code in Listing 9-3 to take different actions depending
-on the value `File::open` returns. Listing 9-4 shows one way to handle the
-`Result` using a basic tool, the `match` expression that we discussed in
-Chapter 6.
+`File::open` qiymatiga qarab turli amallarni bajarish uchun 9-3-Ro'yxatdagi kodga o'zgartirishimiz kerak. 9-4 ro'yxatda biz 6-bobda muhokama qilgan asosiy tool - `match` ifodasi yordamida `Result` ni boshqarishning bir usuli ko'rsatilgan.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust,should_panic
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-04/src/main.rs}}
 ```
 
-<span class="caption">Listing 9-4: Using a `match` expression to handle the
-`Result` variants that might be returned</span>
+<span class="caption">Roʻyxat 9-4: Qaytarilishi mumkin boʻlgan `Result` variantlarini boshqarish uchun `match` ifodasidan foydalanish</span>
 
-Note that, like the `Option` enum, the `Result` enum and its variants have been
-brought into scope by the prelude, so we don’t need to specify `Result::`
-before the `Ok` and `Err` variants in the `match` arms.
+E'tibor bering, `Option` enumi kabi, `Result` enumi va uning variantlari avtomatik import (prelude) orqali kiritilgan, shuning uchun biz `match`  qatoridagi `Ok` va `Err`  variantlaridan oldin `Result::` ni belgilashimiz shart emas.
 
-When the result is `Ok`, this code will return the inner `file` value out of
-the `Ok` variant, and we then assign that file handle value to the variable
-`greeting_file`. After the `match`, we can use the file handle for reading or
-writing.
+Natija `Ok` bo'lsa, bu kod `Ok` variantidan ichki `file` qiymatini qaytaradi va biz ushbu faylni ishlov berish qiymatini `fayl_ochish` o'zgaruvchisiga tayinlaymiz. `match`dan so'ng biz o'qish yoki yozish uchun fayl boshqaruvidan foydalanishimiz mumkin.
 
-The other arm of the `match` handles the case where we get an `Err` value from
-`File::open`. In this example, we’ve chosen to call the `panic!` macro. If
-there’s no file named *hello.txt* in our current directory and we run this
-code, we’ll see the following output from the `panic!` macro:
+`match`ning boshqa qismi `File::open` dan `Err` qiymatini oladigan holatni boshqaradi. Ushbu misolda biz `panic!`  makrosini tanladik. Agar joriy jildimizda *olma.txt* nomli fayl bo‘lmasa va biz ushbu kodni ishga tushirsak, biz `panic!` makrosidan quyidagi natijani ko‘ramiz:
 
 ```console
 {{#include ../listings/ch09-error-handling/listing-09-04/output.txt}}
 ```
 
-As usual, this output tells us exactly what has gone wrong.
+Odatdagidek, bu chiqish bizga nima noto'g'ri ketganligini aniq aytadi.
 
-### Matching on Different Errors
+### Turli xil xatolarga moslashish
 
-The code in Listing 9-4 will `panic!` no matter why `File::open` failed.
-However, we want to take different actions for different failure reasons: if
-`File::open` failed because the file doesn’t exist, we want to create the file
-and return the handle to the new file. If `File::open` failed for any other
-reason—for example, because we didn’t have permission to open the file—we still
-want the code to `panic!` in the same way as it did in Listing 9-4. For this we
-add an inner `match` expression, shown in Listing 9-5.
+9-4 roʻyxatdagi kod nima uchun `File::open` muvaffaqiyatsiz boʻlishidan qatʼiy nazar `panic!` qoʻyadi.
+Biroq, biz turli sabablarga ko'ra turli xil harakatlarni amalga oshirishni xohlaymiz: agar fayl mavjud bo'lmagani uchun `File::open` muvaffaqiyatsiz bo'lsa, biz faylni yaratmoqchimiz va fayl boshqaruvini yangi faylga qaytaramiz. Agar `File::open` boshqa sabablarga ko'ra, masalan, faylni ochishga ruxsatimiz yo'qligi sababli muvaffaqiyatsiz bo'lsa, biz hali ham kodga 9-4 ro'yxatdagi kabi `panic!` qo'yishini xohlaymiz. Buning uchun biz 9-5 ro'yxatda ko'rsatilgan ichki `match` ifodasini qo'shamiz.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 <!-- ignore this test because otherwise it creates hello.txt which causes other
 tests to fail lol -->
@@ -107,35 +65,22 @@ tests to fail lol -->
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-05/src/main.rs}}
 ```
 
-<span class="caption">Listing 9-5: Handling different kinds of errors in
-different ways</span>
+<span class="caption">Ro'yxat 9-5: Har xil turdagi xatolarni turli yo'llar bilan hal qilish</span>
 
-The type of the value that `File::open` returns inside the `Err` variant is
-`io::Error`, which is a struct provided by the standard library. This struct
-has a method `kind` that we can call to get an `io::ErrorKind` value. The enum
-`io::ErrorKind` is provided by the standard library and has variants
-representing the different kinds of errors that might result from an `io`
-operation. The variant we want to use is `ErrorKind::NotFound`, which indicates
-the file we’re trying to open doesn’t exist yet. So we match on
-`greeting_file_result`, but we also have an inner match on `error.kind()`.
+`File::open` `Err` variantida qaytaradigan qiymat turi `io::Error` bo'lib, bu standart kutubxona tomonidan taqdim etilgan strukturadir. Ushbu strukturada `io::ErrorKind` qiymatini olish uchun chaqirishimiz mumkin bo'lgan `kind` metodi mavjud. `io::ErrorKind` enumi standart kutubxona tomonidan taqdim etilgan va `io` operatsiyasi natijasida yuzaga kelishi mumkin bo'lgan turli xil xatolarni ifodalovchi variantlarga ega. Biz foydalanmoqchi boʻlgan variant `ErrorKind::NotFound` boʻlib, biz ochmoqchi boʻlgan fayl hali mavjud emasligini bildiradi. Shunday qilib, biz `fayl_ochish` bo'yicha mos kelamiz, lekin bizda `error.kind()` da ichki match ham bor.
 
-The condition we want to check in the inner match is whether the value returned
-by `error.kind()` is the `NotFound` variant of the `ErrorKind` enum. If it is,
-we try to create the file with `File::create`. However, because `File::create`
-could also fail, we need a second arm in the inner `match` expression. When the
-file can’t be created, a different error message is printed. The second arm of
-the outer `match` stays the same, so the program panics on any error besides
-the missing file error.
+Biz ichki matchni tekshirmoqchi bo'lgan shart - `error.kind()` tomonidan qaytarilgan qiymat `ErrorKind` enumining `NotFound` variantidir. Agar shunday bo'lsa, biz faylni `File::create` yordamida yaratishga harakat qilamiz. Biroq, `File::create` ham muvaffaqiyatsiz bo'lishi mumkinligi sababli, bizga ichki `match` ifodasida ikkinchi arm kerak. Faylni yaratib bo'lmaganda, boshqa xato xabari chop etiladi. Tashqi `match` ning ikkinchi armi bir xil bo'lib qoladi, shuning uchun dastur yetishmayotgan fayl xatosidan tashqari har qanday xato haqida panic qo'yadi.
 
-> ### Alternatives to Using `match` with `Result<T, E>`
+> ### `Result<T, E>` bilan `match` dan foydalanishning muqobillari
 >
-> That’s a lot of `match`! The `match` expression is very useful but also very
-> much a primitive. In Chapter 13, you’ll learn about closures, which are used
-> with many of the methods defined on `Result<T, E>`. These methods can be more
-> concise than using `match` when handling `Result<T, E>` values in your code.
+> Bu juda ko'p `match`! `match` ifodasi juda foydali, lekin ayni paytda
+> juda primitivdir. 13-bobda siz `Result<T, E>` da belgilangan koʻplab
+> metodlarda qoʻllaniladigan yopilishlar(closures) haqida bilib olasiz. Ushbu
+> metodlar kodingizdagi `Result<T, E>` qiymatlari bilan ishlashda `match` 
+> dan foydalanishdan ko'ra qisqaroq bo'lishi mumkin.
 >
-> For example, here’s another way to write the same logic as shown in Listing
-> 9-5, this time using closures and the `unwrap_or_else` method:
+> Misol uchun, 9-5 ro'yxatda ko'rsatilgan mantiqni yozishning yana bir
+> usuli, bu safar closures va `unwrap_or_else` metodi yordamida:
 >
 > <!-- CAN'T EXTRACT SEE https://github.com/rust-lang/mdBook/issues/1127 -->
 >
@@ -144,25 +89,25 @@ the missing file error.
 > use std::io::ErrorKind;
 >
 > fn main() {
->     let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+>     let fayl_ochish = File::open("olma.txt").unwrap_or_else(|error| {
 >         if error.kind() == ErrorKind::NotFound {
->             File::create("hello.txt").unwrap_or_else(|error| {
->                 panic!("Problem creating the file: {:?}", error);
+>             File::create("olma.txt").unwrap_or_else(|error| {
+>                 panic!("Fayl yaratishda muammo: {:?}", error);
 >             })
 >         } else {
->             panic!("Problem opening the file: {:?}", error);
+>             panic!("Faylni ochishda muammo: {:?}", error);
 >         }
 >     });
 > }
 > ```
 >
-> Although this code has the same behavior as Listing 9-5, it doesn’t contain
-> any `match` expressions and is cleaner to read. Come back to this example
-> after you’ve read Chapter 13, and look up the `unwrap_or_else` method in the
-> standard library documentation. Many more of these methods can clean up huge
-> nested `match` expressions when you’re dealing with errors.
+> Garchi bu kod 9-5 roʻyxatdagi kabi harakatga ega boʻlsa-da, unda
+> `match` iboralari mavjud emas va oʻqish uchun qulayroq. 13-bobni o‘qib bo‘lgach,
+> ushbu misolga qayting va standart kutubxona hujjatlarida `unwrap_or_else`
+> metodini qidiring. Ushbu metodlarning ko'pchiligi xatolar bilan
+> shug'ullanayotganda katta o'rinli `match`  iboralarni tozalashi mumkin.
 
-### Shortcuts for Panic on Error: `unwrap` and `expect`
+### Xatoda panic uchun yorliqlar: `unwrap` va `expect`
 
 Using `match` works well enough, but it can be a bit verbose and doesn’t always
 communicate intent well. The `Result<T, E>` type has many helper methods
