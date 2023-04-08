@@ -56,168 +56,103 @@ Misol funksiya tanasi 2 va 2 qo‘shilishi natijasini o‘z ichiga olgan `natija
 
 <span class="caption">Ro'yxat 11-2: Avtomatik ishlab chiqarilgan testni bajarishdan olingan natija</span>
 
-Cargo kompilyatsiya qilindi va sinovdan o'tdi. Biz `running 1 test` qatorini ko'ramiz. The next
-line shows the name of the generated test function, called `it_works`, and that
-the result of running that test is `ok`. The overall summary `test result: ok.`
-means that all the tests passed, and the portion that reads `1 passed; 0
-failed` totals the number of tests that passed or failed.
+Cargo kompilyatsiya qilindi va sinovdan o'tdi. Biz `running 1 test` qatorini ko'ramiz. Keyingi qatorda `ishlaydi` deb nomlangan yaratilgan test funksiyasining nomi va bu testni bajarish natijasi `ok` ekanligini ko'rsatadi. Umumiy xulosa test natijasi `test result: ok.` barcha testlardan muvaffaqiyatli oʻtganligini va `1 passed;` deb yozilgan qismi muvaffaqiyatli oʻtganligini bildiradi; `0 failed` muvaffaqiyatsiz boʻlgan testlar sonini ifodalaydi.
 
-It’s possible to mark a test as ignored so it doesn’t run in a particular
-instance; we’ll cover that in the [“Ignoring Some Tests Unless Specifically
-Requested”][ignoring]<!-- ignore --> section later in this chapter. Because we
-haven’t done that here, the summary shows `0 ignored`. We can also pass an
-argument to the `cargo test` command to run only tests whose name matches a
-string; this is called *filtering* and we’ll cover that in the [“Running a
-Subset of Tests by Name”][subset]<!-- ignore --> section. We also haven’t
-filtered the tests being run, so the end of the summary shows `0 filtered out`.
+Muayyan misolda ishlamasligi uchun testni e'tiborsiz(ignor) deb belgilash mumkin; Biz buni ushbu bobning keyingi qismida ["Agar aniq talab qilinmasa, ba'zi testlarni e'tiborsiz qoldirish"][ignoring]<!-- ignore --> bo'limida ko'rib chiqamiz. Bu yerda biz buni qilmaganimiz sababli, xulosada  `0 ignored` 0-ta eʼtibor berilmagan koʻrsatiladi. Shuningdek, biz argumentni faqat nomi satrga mos keladigan testlarni o'tkazish uchun `cargo test` buyrug'iga o'tkazishimiz mumkin; bu *filtrlash* deb ataladi va biz buni ["Testlar to'plamini nomi bo'yicha ishga tushirish"][subset]<!-- ignore --> bo'limida ko'rib chiqamiz. Shuningdek, biz bajarilayotgan testlarni filtrlamadik, shuning uchun xulosa oxirida `0 filtered out` 0-ta filtrlangan deb ko‘rsatiladi.
 
-The `0 measured` statistic is for benchmark tests that measure performance.
-Benchmark tests are, as of this writing, only available in nightly Rust. See
-[the documentation about benchmark tests][bench] to learn more.
+`0 measured` statistikasi samaradorlikni o'lchaydigan benchmark testlari uchundir.
+Benchmark testlari, ushbu yozuvdan boshlab, faqat nightly Rust-da mavjud. Batafsil ma'lumot olish uchun [benchmark testlari haqidagi hujjatlarga][bench] qarang.
 
-The next part of the test output starting at `Doc-tests adder` is for the
-results of any documentation tests. We don’t have any documentation tests yet,
-but Rust can compile any code examples that appear in our API documentation.
-This feature helps keep your docs and your code in sync! We’ll discuss how to
-write documentation tests in the [“Documentation Comments as
-Tests”][doc-comments]<!-- ignore --> section of Chapter 14. For now, we’ll
-ignore the `Doc-tests` output.
+`Doc-tests adder`(Hujjat testlari qoʻshuvchisi) dan boshlanadigan test natijasining keyingi qismi har qanday hujjat sinovlari natijalariga moʻljallangan. Bizda hali hech qanday hujjat sinovlari yo'q, lekin Rust API hujjatlarida ko'rinadigan har qanday kod misollarini to'plashi mumkin.
+Bu xususiyat hujjatlaringiz va kodingizni sinxronlashtirishga yordam beradi! Hujjat testlarini qanday yozishni 14-bobning [“Hujjatlarga sharhlar test sifatida”][doc-comments]<!-- ignore --> bo‘limida muhokama qilamiz. Hozircha biz `Doc-tests` chiqishini e'tiborsiz qoldiramiz.
 
-Let’s start to customize the test to our own needs. First change the name of
-the `it_works` function to a different name, such as `exploration`, like so:
+Keling, testni o'z ehtiyojlarimizga moslashtirishni boshlaylik. Avval `ishlaydi` funksiyasining nomini `tadqiqot` kabi boshqa nomga o'zgartiring, masalan:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-01-changing-test-name/src/lib.rs}}
 ```
 
-Then run `cargo test` again. The output now shows `exploration` instead of
-`it_works`:
+Keyin yana `cargo test` bajaring. Chiqish(output) endi `ishlaydi` o‘rniga `tadqiqot`ni ko‘rsatadi:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/no-listing-01-changing-test-name/output.txt}}
 ```
 
-Now we’ll add another test, but this time we’ll make a test that fails! Tests
-fail when something in the test function panics. Each test is run in a new
-thread, and when the main thread sees that a test thread has died, the test is
-marked as failed. In Chapter 9, we talked about how the simplest way to panic
-is to call the `panic!` macro. Enter the new test as a function named
-`another`, so your *src/lib.rs* file looks like Listing 11-3.
+Endi biz yana bir test qo'shamiz, lekin bu safar muvaffaqiyatsiz bo'lgan testni qilamiz! Test funktsiyasidagi biror narsa panic qo'zg'atganda, testlar muvaffaqiyatsiz tugaydi. Har bir test yangi threadda o'tkaziladi va asosiy(main) thread sinov chizig'i o'lganini ko'rsa, test muvaffaqiyatsiz deb belgilanadi. 9-bobda biz panic qo'zg'ashning eng oddiy yo'li `panic!` makrosini chaqirish haqida gapirdik. Yangi testni `boshqa` funksiya sifatida kiriting, shunda *src/lib.rs* faylingiz 11-3 roʻyxatiga oʻxshaydi.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,panics,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-03/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 11-3: Adding a second test that will fail because
-we call the `panic!` macro</span>
+<span class="caption">Ro'yxat 11-3: Muvaffaqiyatsiz bo'ladigan ikkinchi testni qo'shish, chunki biz `panic!` makrosini chaqiramiz.</span>
 
-Run the tests again using `cargo test`. The output should look like Listing
-11-4, which shows that our `exploration` test passed and `another` failed.
+`cargo test` yordamida testlarni qaytadan test qiling. Chiqish 11-4 ro'yxatga o'xshash bo'lishi kerak, bu bizning `tadqiqot` sinovimizdan o'tganligini va `boshqa` muvaffaqiyatsiz ekanligini ko'rsatadi.
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/listing-11-03/output.txt}}
 ```
 
-<span class="caption">Listing 11-4: Test results when one test passes and one
-test fails</span>
+<span class="caption">Ro'yxat 11-4: Bitta test sinovdan o'tgan va bitta test muvaffaqiyatsizlikka uchragan sinov natijalari</span>
 
-Instead of `ok`, the line `test tests::another` shows `FAILED`. Two new
-sections appear between the individual results and the summary: the first
-displays the detailed reason for each test failure. In this case, we get the
-details that `another` failed because it `panicked at 'Make this test fail'` on
-line 10 in the *src/lib.rs* file. The next section lists just the names of all
-the failing tests, which is useful when there are lots of tests and lots of
-detailed failing test output. We can use the name of a failing test to run just
-that test to more easily debug it; we’ll talk more about ways to run tests in
-the [“Controlling How Tests Are Run”][controlling-how-tests-are-run]<!-- ignore
---> section.
+`OK` o'rniga `test tests::boshqa` qatori `FAILED`ni koʻrsatadi. Shaxsiy natijalar va xulosa o'rtasida ikkita yangi bo'lim paydo bo'ladi: birinchisida har bir sinov muvaffaqiyatsizligining batafsil sababi ko'rsatiladi. Bunday holda, biz *src/lib.rs* faylidagi 10-qatordagi `panicked at 'Make this test fail'` da panic qo'ygani uchun `boshqa` muvaffaqiyatsizlikka uchraganligi haqidagi tafsilotlarni olamiz. Keyingi bo'limda barcha muvaffaqiyatsiz testlarning nomlari keltirilgan, bu juda ko'p sinovlar va ko'plab batafsil muvaffaqiyatsiz sinov natijalari mavjud bo'lganda foydalidir. Muvaffaqiyatsiz test nomidan uni osonroq debug qilish uchun ishlatishimiz mumkin; testlarni o'tkazish usullari haqida ko'proq ["Testlar qanday o'tkazilishini nazorat qilish"][controlling-how-tests-are-run]<!-- ignore
+--> section bo'limida gaplashamiz.
 
-The summary line displays at the end: overall, our test result is `FAILED`. We
-had one test pass and one test fail.
+Xulosa qatori oxirida ko'rsatiladi: umuman olganda, bizning test natijasimiz `FAILED` muvaffaqiyatsiz. Bizda bitta test sinovi bor edi va bitta sinov muvaffaqiyatsiz tugadi.
 
-Now that you’ve seen what the test results look like in different scenarios,
-let’s look at some macros other than `panic!` that are useful in tests.
+Sinov natijalari turli stsenariylarda qanday ko‘rinishini ko‘rganingizdan so‘ng, keling, testlarda foydali bo‘lgan  `panic!`dan tashqari ba’zi makrolarni ko‘rib chiqaylik.
 
-### Checking Results with the `assert!` Macro
+### Natijalarni `assert!` makrosi bilan tekshirish!
 
-The `assert!` macro, provided by the standard library, is useful when you want
-to ensure that some condition in a test evaluates to `true`. We give the
-`assert!` macro an argument that evaluates to a Boolean. If the value is
-`true`, nothing happens and the test passes. If the value is `false`, the
-`assert!` macro calls `panic!` to cause the test to fail. Using the `assert!`
-macro helps us check that our code is functioning in the way we intend.
+Standart kutubxona tomonidan taqdim etilgan `assert!` makrosi testdagi baʼzi shartlar `true`(toʻgʻri) boʻlishini taʼminlashni istasangiz foydali boʻladi. Biz `assert!` makrosiga mantiqiy(boolean) qiymatga baholovchi argument beramiz. Qiymat `true` bo'lsa, hech narsa sodir bo'lmaydi va sinovdan o'tadi. Agar qiymat `false` bo‘lsa, `assert!` makros testning muvaffaqiyatsiz bo‘lishiga olib kelishi uchun `panic!` chaqiradi. `assert!` makrosidan foydalanish bizning kodimiz biz rejalashtirgan tarzda ishlayotganligini tekshirishga yordam beradi.
 
-In Chapter 5, Listing 5-15, we used a `Rectangle` struct and a `can_hold`
-method, which are repeated here in Listing 11-5. Let’s put this code in the
-*src/lib.rs* file, then write some tests for it using the `assert!` macro.
+5-bob, 5-15-ro'yxarda biz 11-5-ro'yxardada takrorlangan `Kvadrat` strukturasi va `ushlab_tur` metodidan foydalandik. Keling, ushbu kodni *src/lib.rs* fayliga joylashtiramiz, so'ngra `assert!` makrosidan foydalanib, u uchun testlarni yozamiz.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-05/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 11-5: Using the `Rectangle` struct and its
-`can_hold` method from Chapter 5</span>
+<span class="caption">Ro'yxat 11-5: 5-bobdagi `Kvadrat` strukturasi va uning `ushlab_tur` metodidan foydalanish</span>
 
-The `can_hold` method returns a Boolean, which means it’s a perfect use case
-for the `assert!` macro. In Listing 11-6, we write a test that exercises the
-`can_hold` method by creating a `Rectangle` instance that has a width of 8 and
-a height of 7 and asserting that it can hold another `Rectangle` instance that
-has a width of 5 and a height of 1.
+`ushlab_tur` metodi mantiqiy(boolean) qiymatini qaytaradi, ya'ni bu `assert!` makrosi uchun mukammal foydalanish holati. 11-6 ro'yxatda biz kengligi 8 va balandligi 7 bo'lgan `Kvadrat` misolini yaratish va uning kengligi 5 va balandligi 1 bo'lgan boshqa `Kvadrat` misolini ushlab turishi mumkinligini tekshirish orqali `ushlab_tur` metodini bajaradigan testni yozamiz.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-06/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 11-6: A test for `can_hold` that checks whether a
-larger rectangle can indeed hold a smaller rectangle</span>
+<span class="caption">Ro'yxat 11-6: Kattaroq kvadrat haqiqatan ham kichikroq kvadratni sig'dira oladimi yoki yo'qligini tekshiradigan `ushlab_tur` testi</span>
 
-Note that we’ve added a new line inside the `tests` module: `use super::*;`.
-The `tests` module is a regular module that follows the usual visibility rules
-we covered in Chapter 7 in the [“Paths for Referring to an Item in the Module
-Tree”][paths-for-referring-to-an-item-in-the-module-tree]<!-- ignore -->
-section. Because the `tests` module is an inner module, we need to bring the
-code under test in the outer module into the scope of the inner module. We use
-a glob here so anything we define in the outer module is available to this
-`tests` module.
+E'tibor bering, biz `tests` moduliga yangi qator qo'shdik: `use super::*;`. `tests` moduli odatiy modul bo'lib, biz 7-bobda ["Modul daraxtidagi elementga murojaat qilish yo'llari"][paths-for-referring-to-an-item-in-the-module-tree]<!-- ignore --> bo'limida ko'rib chiqqan odatiy ko'rinish qoidalariga amal qiladi. `tests` moduli ichki modul bo'lgani uchun biz tashqi moduldagi sinovdan o'tayotgan kodni ichki modul doirasiga kiritishimiz kerak. Biz bu yerda globdan foydalanamiz, shuning uchun tashqi modulda biz aniqlagan har qanday narsa ushbu `tests` modulida mavjud bo'ladi.
 
-We’ve named our test `larger_can_hold_smaller`, and we’ve created the two
-`Rectangle` instances that we need. Then we called the `assert!` macro and
-passed it the result of calling `larger.can_hold(&smaller)`. This expression is
-supposed to return `true`, so our test should pass. Let’s find out!
+Biz sinovimizga `katta_kichikni_ushlab_turadi` deb nom berdik va o‘zimizga kerak bo‘lgan ikkita `Kvadrat` misolini yaratdik.
+Keyin biz `assert!` makrosini chaqirdik va uni `kattaroq.ushlab_tur(&kichikroq)` deb chaqirish natijasini berdik. Bu ifoda `true` ni qaytarishi kerak, shuning uchun testimiz muvaffaqiyatli o'tishi kerak. Keling, bilib olaylik!
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/listing-11-06/output.txt}}
 ```
 
-It does pass! Let’s add another test, this time asserting that a smaller
-rectangle cannot hold a larger rectangle:
+Test muvaffaqiyatli o'tadi! Keling, yana bir sinovni qo'shamiz, bu safar kichikroq kvadrat kattaroq kvadratni ushlab turolmaydi:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-02-adding-another-rectangle-test/src/lib.rs:here}}
 ```
 
-Because the correct result of the `can_hold` function in this case is `false`,
-we need to negate that result before we pass it to the `assert!` macro. As a
-result, our test will pass if `can_hold` returns `false`:
+Chunki bu holda `ushlab_tur` funksiyasining to'g'ri natijasi `false` bo'lsa, biz uni `assert!` makrosiga o'tkazishdan oldin bu natijani inkor etishimiz kerak. Natijada, agar `ushlab_tur` `false` qiymatini qaytarsa, testimiz o'tadi:
 
 ```console
 {{#include ../listings/ch11-writing-automated-tests/no-listing-02-adding-another-rectangle-test/output.txt}}
 ```
 
-Two tests that pass! Now let’s see what happens to our test results when we
-introduce a bug in our code. We’ll change the implementation of the `can_hold`
-method by replacing the greater-than sign with a less-than sign when it
-compares the widths:
+Ikkita sinovdan o'tadi! Keling, kodimizga xatolik kiritganimizda test natijalarimiz bilan nima sodir bo'lishini ko'rib chiqaylik. Kengliklarni solishtirganda katta belgisini kichikroq belgisi bilan almashtirish orqali `ushlab_tur` metodini amalga oshirishni o‘zgartiramiz:
 
 ```rust,not_desired_behavior,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-03-introducing-a-bug/src/lib.rs:here}}
