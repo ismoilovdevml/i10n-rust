@@ -1,54 +1,27 @@
-## Test Organization
+## Test tashkil etish
 
-As mentioned at the start of the chapter, testing is a complex discipline, and
-different people use different terminology and organization. The Rust community
-thinks about tests in terms of two main categories: unit tests and integration
-tests. *Unit tests* are small and more focused, testing one module in isolation
-at a time, and can test private interfaces. *Integration tests* are entirely
-external to your library and use your code in the same way any other external
-code would, using only the public interface and potentially exercising multiple
-modules per test.
+Bobning boshida aytib o'tilganidek, test murakkab intizom bo'lib, turli odamlar turli terminologiya va tashkilotdan foydalanadilar. Rust hamjamiyati testlarni ikkita asosiy toifaga ko'ra o'ylaydi: birlik testlari(unit test) va integratsiya testlari(integration test). *Unit testlari* kichikroq va ko'proq yo'naltirilgan bo'lib, bir vaqtning o'zida bitta modulni alohida sinovdan o'tkazadi va private interfeyslarni sinab ko'rishi mumkin. Integratsiya testlari kutubxonangizdan(library) butunlay tashqarida bo'lib, kodingizdan faqat public interfeysdan foydalangan holda va har bir test uchun bir nechta modullardan foydalangan holda boshqa har qanday tashqi kod kabi foydalaning.
 
-Writing both kinds of tests is important to ensure that the pieces of your
-library are doing what you expect them to, separately and together.
+Kutubxonangizning qismlari siz kutgan narsani alohida va birgalikda bajarishini ta'minlash uchun ikkala turdagi testlarni yozish muhimdir.
 
-### Unit Tests
+### Unit Testlar
 
-The purpose of unit tests is to test each unit of code in isolation from the
-rest of the code to quickly pinpoint where code is and isn’t working as
-expected. You’ll put unit tests in the *src* directory in each file with the
-code that they’re testing. The convention is to create a module named `tests`
-in each file to contain the test functions and to annotate the module with
-`cfg(test)`.
+Unit testlarining maqsadi kodning qayerda ekanligi va kutilganidek ishlamayotganligini tezda aniqlash uchun kodning har bir birligini(unit) qolgan kodlardan alohida tekshirishdan iborat. Unit testlarini har bir fayldagi *src* jildiga ular tekshirayotgan kod bilan joylashtirasiz. Konventsiya har bir faylda test funktsiyalarini o'z ichiga olgan `tests` nomli modul yaratish va modulga `cfg(test)` bilan izoh berishdan iborat.
 
-#### The Tests Module and `#[cfg(test)]`
+#### Testlar moduli va `#[cfg(test)]`
 
-The `#[cfg(test)]` annotation on the tests module tells Rust to compile and run
-the test code only when you run `cargo test`, not when you run `cargo build`.
-This saves compile time when you only want to build the library and saves space
-in the resulting compiled artifact because the tests are not included. You’ll
-see that because integration tests go in a different directory, they don’t need
-the `#[cfg(test)]` annotation. However, because unit tests go in the same files
-as the code, you’ll use `#[cfg(test)]` to specify that they shouldn’t be
-included in the compiled result.
+Testlar modulidagi `#[cfg(test)]` izohi Rustga test kodini faqat `cargo test`ni bajarganingizda kompilyatsiya qilishni va ishga tushirishni aytadi, `cargo build`ni ishga tushirganingizda emas.
+Bu siz faqat kutubxona qurmoqchi bo'lganingizda kompilyatsiya vaqtini tejaydi va natijada tuzilgan artefaktda joyni tejaydi, chunki testlar kiritilmagan. Integratsiya testlari boshqa jildga o‘tgani uchun ularga `#[cfg(test)]` izohi kerak emasligini ko‘rasiz. Biroq, unit testlari kod bilan bir xil fayllarda joylashganligi sababli, ular kompilyatsiya qilingan natijaga kiritilmasligini belgilash uchun `#[cfg(test)]` dan foydalanasiz.
 
-Recall that when we generated the new `adder` project in the first section of
-this chapter, Cargo generated this code for us:
+Eslatib o'tamiz, biz ushbu bobning birinchi qismida yangi `qoshuvchi` loyihasini yaratganimizda, Cargo biz uchun ushbu kodni yaratdi:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/listing-11-01/src/lib.rs}}
 ```
 
-This code is the automatically generated test module. The attribute `cfg`
-stands for *configuration* and tells Rust that the following item should only
-be included given a certain configuration option. In this case, the
-configuration option is `test`, which is provided by Rust for compiling and
-running tests. By using the `cfg` attribute, Cargo compiles our test code only
-if we actively run the tests with `cargo test`. This includes any helper
-functions that might be within this module, in addition to the functions
-annotated with `#[test]`.
+Bu kod avtomatik ravishda yaratilgan test modulidir. `cfg` atributi *konfiguratsiya(configuration)* degan ma'noni anglatadi va Rustga quyidagi element faqat ma'lum bir konfiguratsiya opsiyasi berilganda kiritilishi kerakligini aytadi. Bunday holda, konfiguratsiya opsiyasi `test` bo'lib, u Rust tomonidan testlarni kompilyatsiya qilish va ishga tushirish uchun taqdim etiladi. `cfg` atributidan foydalanib, Cargo bizning test kodimizni faqat `cargo test` bilan faol ravishda o'tkazganimizdagina kompilyatsiya qiladi. Bunga `#[test]` bilan izohlangan funksiyalarga qoʻshimcha ravishda ushbu modulda boʻlishi mumkin boʻlgan har qanday yordamchi funksiyalar kiradi.
 
 #### Testing Private Functions
 
