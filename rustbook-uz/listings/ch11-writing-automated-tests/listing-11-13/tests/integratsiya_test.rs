@@ -1,4 +1,4 @@
-use adder;
+use qoshuvchi;
 
 #[test]
 fn ikkita_qoshish() {
