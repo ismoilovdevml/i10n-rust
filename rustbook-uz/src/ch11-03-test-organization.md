@@ -96,13 +96,7 @@ Bu buyruq faqat *tests/integration_test.rs* faylidagi testlarni bajaradi.
 
 Ko'proq integratsiya testlarini qo'shsangiz, ularni tartibga solishga yordam berish uchun *tests* jildida ko'proq fayllar yaratishni xohlashingiz mumkin; masalan, siz test funktsiyalarini ular test qilib ko'rayotgan funksiyalari bo'yicha guruhlashingiz mumkin. Yuqorida aytib o'tilganidek, *tests* jildidagi har bir fayl o'zining alohida cratesi sifatida tuzilgan bo'lib, bu oxirgi foydalanuvchilar sizning cratengizdan qanday foydalanishini yanada yaqinroq taqlid qilish uchun alohida qamrovlarni yaratish uchun foydalidir. Biroq, bu shuni anglatadiki, *tests* jildidagi fayllar *src* dagi fayllarga o'xshamaydi, chunki kodni modul va fayllarga qanday ajratish haqida 7-bobda o'rgangansiz.
 
-The different behavior of *tests* directory files is most noticeable when you
-have a set of helper functions to use in multiple integration test files and
-you try to follow the steps in the [“Separating Modules into Different
-Files”][separating-modules-into-files]<!-- ignore --> section of Chapter 7 to
-extract them into a common module. For example, if we create *tests/common.rs*
-and place a function named `setup` in it, we can add some code to `setup` that
-we want to call from multiple test functions in multiple test files:
+*tests* jildidagi fayllarning har xil xatti-harakatlari bir nechta integratsiya test fayllarida foydali bo'ladigan yordamchi funktsiyalar to'plamiga ega bo'lganingizda sezilarli bo'ladi. Aytaylik, siz ularni umumiy modulga chiqarish uchun 7-bob, ["Modullarni turli fayllarga ajratish"][separating-modules-into-files]<!-- ignore --> bosqichlarini bajarishga harakat qilyapsiz. Misol uchun, agar biz *tests/common.rs* ni yaratsak va unga `setup` nomli funksiyani joylashtirsak, biz bir nechta test fayllaridagi bir nechta test funksiyalaridan chaqirmoqchi bo'lgan `setup` ga ba'zi kodlarni qo'shishimiz mumkin:
 
 <span class="filename">Fayl nomi: tests/common.rs</span>
 
@@ -118,9 +112,7 @@ Testlarni qayta ishga tushirganimizda, biz *common.rs* fayli uchun test chiqishi
 
 Test natijalarida `setup` ko'rinishida `running 0 tests` ko'rsatilishi biz xohlagan narsa emas. Biz shunchaki kodni boshqa integratsiya test fayllari bilan baham ko'rmoqchi edik.
 
-To avoid having `common` appear in the test output, instead of creating
-*tests/common.rs*, we’ll create *tests/common/mod.rs*. The project directory
-now looks like this:
+Test natijasida `common` ko'rinishini oldini olish uchun *tests/common.rs* yaratish o'rniga biz *tests/common/mod.rs* ni yaratamiz. Loyiha jildi(fayl structurasi) endi shunday ko'rinadi:
 
 ```text
 ├── Cargo.lock
@@ -133,58 +125,31 @@ now looks like this:
     └── integration_test.rs
 ```
 
-This is the older naming convention that Rust also understands that we
-mentioned in the [“Alternate File Paths”][alt-paths]<!-- ignore --> section of
-Chapter 7. Naming the file this way tells Rust not to treat the `common` module
-as an integration test file. When we move the `setup` function code into
-*tests/common/mod.rs* and delete the *tests/common.rs* file, the section in the
-test output will no longer appear. Files in subdirectories of the *tests*
-directory don’t get compiled as separate crates or have sections in the test
-output.
+Bu eski nomlash konventsiyasi bo'lib, Rust biz 7-bobning ["Muqobil fayl yo'llari(path)"][alt-paths]<!-- ignore --> bo'limida aytib o'tganimizni ham tushunadi.
+Biz `setup` funksiya kodini *tests/common/mod.rs* ga ko'chirsak va *tests/common.rs* faylini o'chirsak, test chiqishidagi bo'lim endi ko'rinmaydi. *tests* jildining pastki jildlaridagi fayllar alohida cratelar sifatida kompilyatsiya qilinmaydi yoki test chiqishida(output) bo'limlarga(section) ega emas.
 
-After we’ve created *tests/common/mod.rs*, we can use it from any of the
-integration test files as a module. Here’s an example of calling the `setup`
-function from the `it_adds_two` test in *tests/integration_test.rs*:
+*tests/common/mod.rs* ni yaratganimizdan so'ng, biz uni modul sifatida har qanday integratsiya test faylidan foydalanishimiz mumkin. Bu yerda *tests/integration_test.rs* da `ikkita_qoshish` testidan `setup` funksiyasini chaqirish misoli keltirilgan:
 
-<span class="filename">Filename: tests/integration_test.rs</span>
+<span class="filename">Fayl nomi: tests/integration_test.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch11-writing-automated-tests/no-listing-13-fix-shared-test-code-problem/tests/integration_test.rs}}
 ```
 
-Note that the `mod common;` declaration is the same as the module declaration
-we demonstrated in Listing 7-21. Then in the test function, we can call the
-`common::setup()` function.
+Esda tutingki, `mod common;` deklaratsiyasi biz 7-21 roʻyxatda koʻrsatgan modul deklaratsiyasi bilan bir xil. Keyin test funksiyasida biz `common::setup()` funksiyasini chaqirishimiz mumkin.
 
-#### Integration Tests for Binary Crates
+#### Binary Cratelar uchun integratsiya testlari
 
-If our project is a binary crate that only contains a *src/main.rs* file and
-doesn’t have a *src/lib.rs* file, we can’t create integration tests in the
-*tests* directory and bring functions defined in the *src/main.rs* file into
-scope with a `use` statement. Only library crates expose functions that other
-crates can use; binary crates are meant to be run on their own.
+Agar bizning loyihamiz faqat *src/main.rs* faylini o'z ichiga olgan va *src/lib.rs* fayliga ega bo'lmagan ikkilik crate(binary crate) bo'lsa, biz *tests* jildida integratsiya testlarini yarata olmaymiz va *src/main.rs* faylida belgilangan funksiyalarni `use` statementi bilan qamrab ololmaymiz. Faqat kutubxona cratelari(library crate) boshqa cratelar foydalanishi mumkin bo'lgan funksiyalarni ko'rsatadi; binary cratelar o'z-o'zidan ishlashi uchun mo'ljallangan.
 
-This is one of the reasons Rust projects that provide a binary have a
-straightforward *src/main.rs* file that calls logic that lives in the
-*src/lib.rs* file. Using that structure, integration tests *can* test the
-library crate with `use` to make the important functionality available.
-If the important functionality works, the small amount of code in the
-*src/main.rs* file will work as well, and that small amount of code doesn’t
-need to be tested.
+Bu binary faylni ta'minlovchi Rust loyihalarida *src/lib.rs* faylida yashovchi logicni chaqiruvchi(call logic) oddiy *src/main.rs* fayliga ega bo'lishining sabablaridan biri. Ushbu structedan foydalanib, integratsiya testlari kutubxona cratesini muhim funksiyalarni mavjud qilish uchun `use` bilan sinab ko'rishi mumkin.
+Agar muhim funksiya ishlayotgan bo'lsa, *src/main.rs* faylidagi kichik kod miqdori ham ishlaydi va bu kichik kod miqdorini sinab ko'rish kerak emas.
 
-## Summary
+## Xulosa
 
-Rust’s testing features provide a way to specify how code should function to
-ensure it continues to work as you expect, even as you make changes. Unit tests
-exercise different parts of a library separately and can test private
-implementation details. Integration tests check that many parts of the library
-work together correctly, and they use the library’s public API to test the code
-in the same way external code will use it. Even though Rust’s type system and
-ownership rules help prevent some kinds of bugs, tests are still important to
-reduce logic bugs having to do with how your code is expected to behave.
+Rust-ning test xususiyatlari(feature) kod qanday ishlashini belgilash usulini taqdim etadi va u siz kutganingizdek ishlashini ta'minlaydi, hatto siz o'zgartirishlar kiritsangiz ham. Unit testlari kutubxonaning turli qismlarini alohida bajaradi va private impelement qilish tafsilotlarini sinab ko'rishi mumkin. Integratsiya testlari kutubxonaning ko'p qismlari to'g'ri ishlashini tekshiradi va ular tashqi kod uni ishlatadigan tarzda kodni sinab ko'rish uchun kutubxonaning umumiy API'sidan foydalanadilar. Rustning type systemi va ownership qoidalari ba'zi xatolarning oldini olishga yordam bergan bo'lsa ham, testlar sizning kodingiz qanday ishlashi bilan bog'liq bo'lgan mantiqiy xatolarni kamaytirish uchun hali ham muhimdir.
 
-Let’s combine the knowledge you learned in this chapter and in previous
-chapters to work on a project!
+Keling, ushbu bobda va oldingi boblarda olgan bilimlaringizni loyiha ustida ishlash uchun birlashtiraylik!
 
 [paths]: ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html
 [separating-modules-into-files]:
