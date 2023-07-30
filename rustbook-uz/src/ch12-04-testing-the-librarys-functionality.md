@@ -25,148 +25,100 @@ Bizga endi ular kerak emasligi sababli, dasturning harakatini tekshirish uchun f
 
 <span class="caption">12-15 roʻyxat: `qidiruv` funksiyasi uchun muvaffaqiyatsiz test yaratish</span>
 
-This test searches for the string `"duct"`. The text we’re searching is three
-lines, only one of which contains `"duct"` (Note that the backslash after the
-opening double quote tells Rust not to put a newline character at the beginning
-of the contents of this string literal). We assert that the value returned from
-the `search` function contains only the line we expect.
+Bu test `marali` qatorini qidiradi.Biz izlayotgan matn uchta qatordan iborat bo‘lib, ulardan faqat bittasi `marali`ni o‘z ichiga oladi (E’tibor bering, qo‘sh qo‘shtirnoqning ochilishidan keyingi teskari chiziq Rustga ushbu satr literalining boshiga yangi qator belgisini qo‘ymaslikni bildiradi). `qidiruv` funksiyasidan qaytarilgan qiymat faqat biz kutgan qatorni o'z ichiga oladi, deb ta'kidlaymiz.
 
-We aren’t yet able to run this test and watch it fail because the test doesn’t
-even compile: the `search` function doesn’t exist yet! In accordance with TDD
-principles, we’ll add just enough code to get the test to compile and run by
-adding a definition of the `search` function that always returns an empty
-vector, as shown in Listing 12-16. Then the test should compile and fail
-because an empty vector doesn’t match a vector containing the line `"safe,
-fast, productive."`
+Biz hali bu testni bajara olmaymiz va uning muvaffaqiyatsizligini kuzata olmaymiz, chunki test hatto kompilyatsiya ham qilmaydi: `qidiruv` funksiyasi hali mavjud emas! TDD tamoyillariga muvofiq, biz 12-16 roʻyxatda koʻrsatilganidek, har doim boʻsh vektorni qaytaruvchi `qidiruv` funksiyasining definitionni qoʻshish orqali testni kompilyatsiya qilish va ishga tushirish uchun yetarli kodni qoʻshamiz. Keyin test kompilyatsiya qilinishi va muvaffaqiyatsiz bo'lishi kerak, chunki bo'sh vektor `"xavfsiz, tez, samarali."` qatorini o'z ichiga olgan vektorga mos kelmaydi.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-16/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-16: Defining just enough of the `search`
-function so our test will compile</span>
+<span class="caption">Ro'yxat 12-16: `qidiruv` funksiyasini yetarli darajada aniqlash, shuning uchun testimiz kompilyatsiya bo'ladi</span>
 
-Notice that we need to define an explicit lifetime `'a` in the signature of
-`search` and use that lifetime with the `contents` argument and the return
-value. Recall in [Chapter 10][ch10-lifetimes]<!-- ignore --> that the lifetime
-parameters specify which argument lifetime is connected to the lifetime of the
-return value. In this case, we indicate that the returned vector should contain
-string slices that reference slices of the argument `contents` (rather than the
-argument `query`).
+E'tibor bering, biz `qidiruv` signaturesida `'a` aniq lifetimeni belgilashimiz va bu lifetimeni `tarkib` argumenti va qaytarish(return) qiymati bilan ishlatishimiz kerak. [10-bobda][ch10-lifetimes]<!-- ignore -->  esda tutingki, lifetime parametrlari qaysi argumentning lifetime(ishlash muddati) qaytariladigan qiymatning lifetime bilan bog'liqligini belgilaydi. Bunday holda, qaytarilgan vektorda `tarkib` argumentining bo'laklariga (`sorov` argumenti o'rniga) reference qiluvchi string bo'laklari bo'lishi kerakligini ko'rsatamiz.
 
-In other words, we tell Rust that the data returned by the `search` function
-will live as long as the data passed into the `search` function in the
-`contents` argument. This is important! The data referenced *by* a slice needs
-to be valid for the reference to be valid; if the compiler assumes we’re making
-string slices of `query` rather than `contents`, it will do its safety checking
-incorrectly.
+Boshqacha qilib aytganda, biz Rustga aytamizki, `qidiruv` funksiyasi tomonidan qaytarilgan maʼlumotlar `tarkib` argumentida `qidiruv` funksiyasiga oʻtgan maʼlumotlar shuncha vaqtgacha yashaydi. Bu muhim! Murojaatlar haqiqiy bo'lishi uchun bo'laklar(slice) bo'yicha reference qilingan ma'lumotlar ham haqiqiy bo'lishi kerak; agar kompilyator biz `tarkib` emas, balki `sorov` ning satr bo'laklarini(string slice) yaratmoqda deb hisoblasa, u xavfsizlik tekshiruvini noto'g'ri bajaradi.
 
-If we forget the lifetime annotations and try to compile this function, we’ll
-get this error:
+Agar biz lifetime izohlarni(annotation) unutib, ushbu funksiyani kompilyatsiya qilishga harakat qilsak, biz ushbu xatoni olamiz:
 
 ```console
 {{#include ../listings/ch12-an-io-project/output-only-02-missing-lifetimes/output.txt}}
 ```
 
-Rust can’t possibly know which of the two arguments we need, so we need to tell
-it explicitly. Because `contents` is the argument that contains all of our text
-and we want to return the parts of that text that match, we know `contents` is
-the argument that should be connected to the return value using the lifetime
-syntax.
+Rust bizga ikkita argumenning qaysi biri kerakligini bila olmaydi, shuning uchun biz buni aniq aytishimiz kerak. `tarkib` barcha matnimizni o'z ichiga olgan argument bo'lgani uchun va biz ushbu matnning mos keladigan qismlarini qaytarmoqchi bo'lganimiz sababli, biz `tarkib` lifetime sintaksisi yordamida qaytarish qiymatiga ulanishi kerak bo'lgan argument ekanligini bilamiz.
 
-Other programming languages don’t require you to connect arguments to return
-values in the signature, but this practice will get easier over time. You might
-want to compare this example with the [“Validating References with
-Lifetimes”][validating-references-with-lifetimes]<!-- ignore --> section in
-Chapter 10.
+Boshqa dasturlash tillari signaturedagi qiymatlarni qaytarish uchun argumentlarni ulashni talab qilmaydi, ammo bu amaliyot vaqt o'tishi bilan osonlashadi. Siz ushbu misolni 10-bobdagi [“Ma’lumotnomalarni lifetime bilan tekshirish”][validating-references-with-lifetimes]<!-- ignore --> bo‘limi bilan solishtirishingiz mumkin.
 
-Now let’s run the test:
+Endi testni bajaramiz:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-16/output.txt}}
 ```
 
-Great, the test fails, exactly as we expected. Let’s get the test to pass!
+Ajoyib, test biz kutganimizdek muvaffaqiyatsiz tugadi. Keling, testdan o'tamiz!
 
-### Writing Code to Pass the Test
+### Testdan o'tish uchun kod yozish
 
-Currently, our test is failing because we always return an empty vector. To fix
-that and implement `search`, our program needs to follow these steps:
+Hozirda testimiz muvaffaqiyatsiz tugadi, chunki biz har doim bo'sh vektorni qaytaramiz. Buni tuzatish va `qidiruv` ni amalga oshirish uchun dasturimiz quyidagi bosqichlarni bajarishi kerak:
 
-* Iterate through each line of the contents.
-* Check whether the line contains our query string.
-* If it does, add it to the list of values we’re returning.
-* If it doesn’t, do nothing.
-* Return the list of results that match.
+* `tarkib` ning har bir satrini takrorlang.
+* Berilgan satrda siz izlayotgan qator mavjudligini tekshiring.
+* Agar shunday bo'lsa, uni biz qaytaradigan qiymatlar ro'yxatiga qo'shing.
+* Agar bunday bo'lmasa, hech narsa qilmang.
+* Mos keladigan natijalar ro'yxatini qaytaring.
 
-Let’s work through each step, starting with iterating through lines.
+Keling, satrlarni takrorlashdan boshlab, har bir bosqichda ishlaylik.
 
-#### Iterating Through Lines with the `lines` Method
+#### `lines` metodi bilan qatorlar bo'ylab takrorlash
 
-Rust has a helpful method to handle line-by-line iteration of strings,
-conveniently named `lines`, that works as shown in Listing 12-17. Note this
-won’t compile yet.
+Rust 12-17 ro'yxatda ko'rsatilganidek, qulay tarzda `lines` deb nomlangan satrlarni qatorma-qator takrorlash uchun foydali metodga ega. E'tibor bering, bu hali kompilyatsiya qilinmaydi.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-17/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-17: Iterating through each line in `contents`
+<span class="caption">Ro'yxat 12-17: `tarkib`dagi har bir qatorni takrorlash
 </span>
 
-The `lines` method returns an iterator. We’ll talk about iterators in depth in
-[Chapter 13][ch13-iterators]<!-- ignore -->, but recall that you saw this way
-of using an iterator in [Listing 3-5][ch3-iter]<!-- ignore -->, where we used a
-`for` loop with an iterator to run some code on each item in a collection.
+`lines` metodi iteratorni qaytaradi.Biz iteratorlar haqida [13-bobda][ch13-iterators]<!-- ignore --> chuqurroq gaplashamiz, lekin esda tutingki, siz iteratordan foydalanishning bunday usulini [3-5-ro'yxatda][ch3-iter]<!-- ignore --> ko'rgansiz, bu yerda biz to'plamdagi har bir elementda ba'zi kodlarni ishlatish uchun iterator bilan `for` siklidan foydalanganmiz.
 
-#### Searching Each Line for the Query
+#### So'rov uchun har bir qatorni qidirish
 
-Next, we’ll check whether the current line contains our query string.
-Fortunately, strings have a helpful method named `contains` that does this for
-us! Add a call to the `contains` method in the `search` function, as shown in
-Listing 12-18. Note this still won’t compile yet.
+Keyinchalik, joriy qatorda so'rovlar qatori mavjudligini tekshiramiz. Yaxshiyamki, satrlarda biz uchun buni amalga oshiradigan `contains` deb nomlangan foydali metod mavjud! 12-18 roʻyxatda koʻrsatilganidek, `qidiruv` funksiyasidagi `contains` metodiga murojatni qoʻshing. E'tibor bering, bu hali kompilyatsiya qilinmaydi.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-18/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-18: Adding functionality to see whether the
-line contains the string in `query`</span>
+<span class="caption">Ro'yxat 12-18: satrda `sorov` dagi satr mavjudligini ko'rish uchun funksiya qo'shiladi</span>
 
-At the moment, we’re building up functionality. To get it to compile, we need
-to return a value from the body as we indicated we would in the function
-signature.
+Ayni paytda biz funksionallikni yaratmoqdamiz. Uni kompilyatsiya qilish uchun biz funksiya signaturesida ko'rsatganimizdek, tanadan qiymatni qaytarishimiz kerak.
 
-#### Storing Matching Lines
+#### Mos keladigan qatorlarni saqlash
 
-To finish this function, we need a way to store the matching lines that we want
-to return. For that, we can make a mutable vector before the `for` loop and
-call the `push` method to store a `line` in the vector. After the `for` loop,
-we return the vector, as shown in Listing 12-19.
+Ushbu funksiyani tugatish uchun bizga qaytarmoqchi bo'lgan mos keladigan satrlarni saqlash metodi kerak. Buning uchun biz `for` siklidan oldin o'zgaruvchan vector yasashimiz va vectorda `line`ni saqlash uchun `push` metodini chaqirishimiz mumkin. `for` siklidan so'ng, 12-19 ro'yxatda ko'rsatilganidek, vectorni qaytaramiz.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-19/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 12-19: Storing the lines that match so we can
-return them</span>
+<span class="caption">Ro'yxat 12-19: Biz ularni qaytarishimiz uchun mos keladigan satrlarni saqlash</span>
 
-Now the `search` function should return only the lines that contain `query`,
-and our test should pass. Let’s run the test:
+Endi `qidiruv` funksiyasi faqat `sorov` ni o'z ichiga olgan qatorlarni qaytarishi kerak va bizning testimiz o'tishi kerak. Keling, testni bajaramiz:
 
 ```console
 {{#include ../listings/ch12-an-io-project/listing-12-19/output.txt}}
 ```
 
-Our test passed, so we know it works!
+Testimiz muvaffaqiyatli o'tdi, shuning uchun u ishlayotganini bilamiz!
 
 At this point, we could consider opportunities for refactoring the
 implementation of the search function while keeping the tests passing to
