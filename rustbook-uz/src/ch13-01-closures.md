@@ -1,279 +1,157 @@
 <!-- Old heading. Do not remove or links may break. -->
 <a id="closures-anonymous-functions-that-can-capture-their-environment"></a>
 
-## Closures: Anonymous Functions that Capture Their Environment
+## Closurelar: Environmentni qamrab oladigan anonim funksiyalar
 
-Rust’s closures are anonymous functions you can save in a variable or pass as
-arguments to other functions. You can create the closure in one place and then
-call the closure elsewhere to evaluate it in a different context. Unlike
-functions, closures can capture values from the scope in which they’re defined.
-We’ll demonstrate how these closure features allow for code reuse and behavior
-customization.
+Rustning closureri - bu o'zgaruvchida saqlashingiz yoki boshqa funksiyalarga argument sifatida o'tishingiz mumkin bo'lgan anonim funktsiyalar. Closureni bir joyda yaratishingiz va keyin uni boshqa kontekstda baholash uchun boshqa joyga murojaat qilishingiz mumkin. Funksiyalardan farqli o'laroq, closurelar ular belgilangan doiradagi qiymatlarni olishlari mumkin.
+Ushbu closure xususiyatlari kodni qayta ishlatish va xatti-harakatlarni moslashtirishga(behavior customization) qanday imkon berishini ko'rsatamiz.
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="creating-an-abstraction-of-behavior-with-closures"></a>
 <a id="refactoring-using-functions"></a>
 <a id="refactoring-with-closures-to-store-code"></a>
 
-### Capturing the Environment with Closures
+### Environmentni closurelar bilan qo'lga olish
 
-We’ll first examine how we can use closures to capture values from the
-environment they’re defined in for later use. Here’s the scenario: Every so
-often, our t-shirt company gives away an exclusive, limited-edition shirt to
-someone on our mailing list as a promotion. People on the mailing list can
-optionally add their favorite color to their profile. If the person chosen for
-a free shirt has their favorite color set, they get that color shirt. If the
-person hasn’t specified a favorite color, they get whatever color the company
-currently has the most of.
+Avvalo, keyinchalik foydalanish uchun ular belgilangan muhitdan(environment) qiymatlarni olish uchun closurelardan qanday foydalanishimiz mumkinligini ko'rib chiqamiz.Bu senariy: Ko'pincha bizning futbolka kompaniyamiz reklama ro'yxatidagi kimgadir eksklyuziv, cheklangan nashrdagi futbolkani sovg'a sifatida taqdim etadi. Pochta ro'yxatidagi odamlar ixtiyoriy ravishda o'z profillariga sevimli ranglarini qo'shishlari mumkin. Agar bepul futbolka uchun tanlangan kishi o'zining sevimli ranglar to'plamiga ega bo'lsa, u rangdagi futbolkani oladi. Agar biror kishi sevimli rangni ko'rsatmagan bo'lsa, u kompaniyada eng ko'p bo'lgan rangni oladi.
 
-There are many ways to implement this. For this example, we’re going to use an
-enum called `ShirtColor` that has the variants `Red` and `Blue` (limiting the
-number of colors available for simplicity). We represent the company’s
-inventory with an `Inventory` struct that has a field named `shirts` that
-contains a `Vec<ShirtColor>` representing the shirt colors currently in stock.
-The method `giveaway` defined on `Inventory` gets the optional shirt
-color preference of the free shirt winner, and returns the shirt color the
-person will get. This setup is shown in Listing 13-1:
+Buni amalga oshirishning ko'plab usullari mavjud. Ushbu misol uchun biz `Qizil` va `Moviy` variantlariga ega `FutbolkaRangi` nomli enumdan foydalanamiz (oddiylik uchun mavjud ranglar sonini cheklaydi). Biz kompaniya inventarini `Inventarizatsiya` strukturasi bilan ifodalaymiz, unda `futbolkalar` deb nomlangan maydon mavjud bo‘lib, unda hozirda mavjud bo‘lgan futbolka ranglarini ifodalovchi `Vec<FutbolkaRangi>` mavjud.
+`Inventarizatsiya` da belgilangan `yutuq` metodi bepul futbolka g‘olibining ixtiyoriy futbolka rangini afzal ko‘radi va odam oladigan futbolka rangini qaytaradi. Ushbu sozlash 13-1 ro'yxatda ko'rsatilgan:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-01/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-1: Shirt company giveaway situation</span>
+<span class="caption">Ro'yxat 13-1: Futbolka kompaniyasining sovg'a holati</span>
 
-The `store` defined in `main` has two blue shirts and one red shirt remaining
-to distribute for this limited-edition promotion. We call the `giveaway` method
-for a user with a preference for a red shirt and a user without any preference.
+`main` boʻlimida belgilangan `dokon` ikkita moviy futbolka va bitta qizil futbolka qolgan. Qizil ko'ylakni afzal ko'rgan foydalanuvchi va hech qanday imtiyozsiz foydalanuvchi uchun `yutuq` metodini chaqiramiz.
 
-Again, this code could be implemented in many ways, and here, to focus on
-closures, we’ve stuck to concepts you’ve already learned except for the body of
-the `giveaway` method that uses a closure. In the `giveaway` method, we get the
-user preference as a parameter of type `Option<ShirtColor>` and call the
-`unwrap_or_else` method on `user_preference`. The [`unwrap_or_else` method on
-`Option<T>`][unwrap-or-else]<!-- ignore --> is defined by the standard library.
-It takes one argument: a closure without any arguments that returns a value `T`
-(the same type stored in the `Some` variant of the `Option<T>`, in this case
-`ShirtColor`). If the `Option<T>` is the `Some` variant, `unwrap_or_else`
-returns the value from within the `Some`. If the `Option<T>` is the `None`
-variant, `unwrap_or_else` calls the closure and returns the value returned by
-the closure.
+Shunga qaramay, ushbu kod ko'p jihatdan amalga oshirilishi mumkin va bu yerda, closurelarga e'tibor qaratish uchun biz siz allaqachon o'rgangan tushunchalarga yopishib oldik, closuredan foydalanadigan `yutuq` metodidan tashqari. `yutuq` metodida biz `Option<FutbolkaRangi>` turidagi parametr sifatida foydalanuvchi imtiyozini olamiz va `foydalanuvchi_afzalligi` da `unwrap_or_else` metodini chaqiramiz. [`Option<T>` da `unwrap_or_else`][unwrap-or-else]<!-- ignore --> metodi standart kutubxona tomonidan aniqlanadi. Buning uchun bitta argument kerak bo‘ladi: `T` qiymatini qaytaruvchi hech qanday argumentsiz closure (`Option<T>` enumning `Some` variantida, bizning holatimizda `FutbolkaRangi`da tugaydigan qiymat turiga aylantiriladi). Agar `Option<T>` `Some` varianti bo'lsa, `unwrap_or_else` qiymatini `Some` ichidan qaytaradi. Agar `Option<T>` `None` varianti bo'lsa, `unwrap_or_else` closureni chaqiradi va closure orqali qaytarilgan qiymatni qaytaradi.
 
-We specify the closure expression `|| self.most_stocked()` as the argument to
-`unwrap_or_else`. This is a closure that takes no parameters itself (if the
-closure had parameters, they would appear between the two vertical bars). The
-body of the closure calls `self.most_stocked()`. We’re defining the closure
-here, and the implementation of `unwrap_or_else` will evaluate the closure
-later if the result is needed.
+Biz closure ifodasini belgilaymiz `|| self.most_stocked()`ni `unwrap_or_else` argumenti sifatida. Bu hech qanday parametrlarni o'zi qabul qilmaydigan closuredir (agar closure parametrlari bo'lsa, ular ikkita vertikal chiziq orasida paydo bo'ladi). Closurening asosiy qismi `self.most_stocked()` ni chaqiradi. Biz bu yerda closureni aniqlayapmiz va `unwrap_or_else` ni amalga oshirish, agar natija kerak bo‘lsa, keyinroq closureni baholaydi.
 
-Running this code prints:
+Ushbu kodni ishga tushirsak quyidagi natijani chop etadi:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-01/output.txt}}
 ```
 
-One interesting aspect here is that we’ve passed a closure that calls
-`self.most_stocked()` on the current `Inventory` instance. The standard library
-didn’t need to know anything about the `Inventory` or `ShirtColor` types we
-defined, or the logic we want to use in this scenario. The closure captures an
-immutable reference to the `self` `Inventory` instance and passes it with the
-code we specify to the `unwrap_or_else` method. Functions, on the other hand,
-are not able to capture their environment in this way.
+Qiziqarli tomoni shundaki, biz joriy `Inventarizatsiya` misolida `self.most_stocked()` deb nomlanuvchi closuredan o‘tdik. Standart kutubxona biz belgilagan `Inventarizatsiya` yoki `FutbolkaRangi` turlari yoki biz ushbu senariyda foydalanmoqchi bo'lgan mantiq haqida hech narsa bilishi shart emas edi. Closure `self`  `Inventarizatsiya` misoliga o'zgarmas(immutable) referenceni oladi va uni biz belgilagan kod bilan `unwrap_or_else` metodiga uzatadi. Funksiyalar esa o'z muhitini(environmentini) shu tarzda ushlab tura olmaydi.
 
-### Closure Type Inference and Annotation
+### Closure typi Inference va Annotation
 
-There are more differences between functions and closures. Closures don’t
-usually require you to annotate the types of the parameters or the return value
-like `fn` functions do. Type annotations are required on functions because the
-types are part of an explicit interface exposed to your users. Defining this
-interface rigidly is important for ensuring that everyone agrees on what types
-of values a function uses and returns. Closures, on the other hand, aren’t used
-in an exposed interface like this: they’re stored in variables and used without
-naming them and exposing them to users of our library.
+Funksiyalar va closurelar o'rtasida ko'proq farqlar mavjud. Closurelar odatda parametrlar turlarini yoki `fn` funksiyalari kabi qaytarish qiymatini(return value) izohlashni talab qilmaydi. Funksiyalar uchun tur annotationlari talab qilinadi, chunki turlar foydalanuvchilarga ochiq interfeysning bir qismidir. Ushbu interfeysni qat'iy belgilash, har bir kishi funksiya qanday turdagi qiymatlardan foydalanishi va qaytarishi(return) haqida kelishib olishini ta'minlash uchun muhimdir. Boshqa tomondan, closurelar bu kabi ochiq interfeysda ishlatilmaydi: ular o'zgaruvchilarda saqlanadi va ularni nomlamasdan va kutubxonamiz foydalanuvchilariga ko'rsatmasdan foydalaniladi.
 
-Closures are typically short and relevant only within a narrow context rather
-than in any arbitrary scenario. Within these limited contexts, the compiler can
-infer the types of the parameters and the return type, similar to how it’s able
-to infer the types of most variables (there are rare cases where the compiler
-needs closure type annotations too).
+Closurelar odatda qisqa va har qanday ixtiyoriy senariyda emas, faqat tor kontekstda tegishli. Ushbu cheklangan kontekstlarda kompilyator ko'pgina o'zgaruvchilarning turlarini qanday aniqlashga qodir bo'lganiga o'xshab, parametrlarning turlarini va qaytish turini taxmin qilishi mumkin (kompilyatorga closure turi annotationlari ham kerak bo'lgan kamdan-kam holatlar mavjud).
 
-As with variables, we can add type annotations if we want to increase
-explicitness and clarity at the cost of being more verbose than is strictly
-necessary. Annotating the types for a closure would look like the definition
-shown in Listing 13-2. In this example, we’re defining a closure and storing it
-in a variable rather than defining the closure in the spot we pass it as an
-argument as we did in Listing 13-1.
+O'zgaruvchilarda bo'lgani kabi, agar biz aniqlik va ravshanlikni oshirishni xohlasak, zarur bo'lgandan ko'ra batafsilroq bo'lish uchun turdagi annotationlarni qo'shishimiz mumkin. Closure uchun turlarga izoh(annotation) qo'yish 13-2 ro'yxatda ko'rsatilgan definitionga o'xshaydi. Ushbu misolda biz closureni aniqlaymiz va uni 13-1 ro'yxatda bo'lgani kabi argument sifatida topshirgan joyda closureni belgilash o'rniga uni o'zgaruvchida saqlaymiz.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-02/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-2: Adding optional type annotations of the
-parameter and return value types in the closure</span>
+<span class="caption">Ro'yxat 13-2: Ixtiyoriy turdagi annotationlarni qo'shish
+closureda parametr va qaytariladigan qiymat turlari</span>
 
-With type annotations added, the syntax of closures looks more similar to the
-syntax of functions. Here we define a function that adds 1 to its parameter and
-a closure that has the same behavior, for comparison. We’ve added some spaces
-to line up the relevant parts. This illustrates how closure syntax is similar
-to function syntax except for the use of pipes and the amount of syntax that is
-optional:
+Turga annotationlar qoʻshilishi bilan closure sintaksisi funksiyalar sintaksisiga koʻproq oʻxshaydi. Bu yerda biz taqqoslash uchun parametriga 1 qo'shadigan funksiyani va bir xil xatti-harakatlarga ega bo'lgan closureni aniqlaymiz. Tegishli qismlarni bir qatorga qo'yish uchun bir nechta bo'shliqlar qo'shdik. Bu pipelardan foydalanish va ixtiyoriy bo'lgan sintaksis miqdori bundan mustasno, closure sintaksisi funksiya sintaksisiga qanchalik o'xshashligini ko'rsatadi:
 
 ```rust,ignore
-fn  add_one_v1   (x: u32) -> u32 { x + 1 }
-let add_one_v2 = |x: u32| -> u32 { x + 1 };
-let add_one_v3 = |x|             { x + 1 };
-let add_one_v4 = |x|               x + 1  ;
+fn  bitta_v1_qoshish    (x: u32) -> u32 { x + 1 }
+let bitta_v2_qoshish =  |x: u32| -> u32 { x + 1 };
+let bitta_v3_qoshish =  |x|             { x + 1 };
+let bitta_v4_qoshish =  |x|               x + 1  ;
 ```
 
-The first line shows a function definition, and the second line shows a fully
-annotated closure definition. In the third line, we remove the type annotations
-from the closure definition. In the fourth line, we remove the brackets, which
-are optional because the closure body has only one expression. These are all
-valid definitions that will produce the same behavior when they’re called. The
-`add_one_v3` and `add_one_v4` lines require the closures to be evaluated to be
-able to compile because the types will be inferred from their usage. This is
-similar to `let v = Vec::new();` needing either type annotations or values of
-some type to be inserted into the `Vec` for Rust to be able to infer the type.
+Birinchi qatorda funksiya taʼrifi(definition), ikkinchi qatorda esa toʻliq izohlangan closure definitioni koʻrsatilgan. Uchinchi qatorda biz closure definitiondan turdagi annotationlarni olib tashlaymiz. To'rtinchi qatorda biz qavslarni olib tashlaymiz, ular ixtiyoriy, chunki closure tanas(body) faqat bitta ifodaga(expression) ega. Bularning barchasi to'g'ri definitionlar bo'lib, ular chaqirilganda bir xil xatti-harakatlarni keltirib chiqaradi. `bitta_v3_qoshish` va `bitta_v4_qoshish` qatorlari kompilyatsiya qilish uchun closurelarni baholashni talab qiladi, chunki turlar ulardan foydalanishdan kelib chiqadi. Bu `let v = Vec::new();` ga o'xshash bo'lib, Rust turini aniqlay olishi uchun `Vec` ga turiga izohlar(annotation) yoki ba'zi turdagi qiymatlar kiritilishi kerak.
 
-For closure definitions, the compiler will infer one concrete type for each of
-their parameters and for their return value. For instance, Listing 13-3 shows
-the definition of a short closure that just returns the value it receives as a
-parameter. This closure isn’t very useful except for the purposes of this
-example. Note that we haven’t added any type annotations to the definition.
-Because there are no type annotations, we can call the closure with any type,
-which we’ve done here with `String` the first time. If we then try to call
-`example_closure` with an integer, we’ll get an error.
+Closure definitionlari uchun kompilyator ularning har bir parametri va ularning qaytish(return) qiymati uchun bitta aniq turdagi xulosa chiqaradi. Masalan, 13-3 ro'yxatda parametr sifatida qabul qilingan qiymatni qaytaradigan qisqa closure definitioni ko'rsatilgan. Ushbu closure ushbu misol maqsadlaridan tashqari juda foydali emas. E'tibor bering, biz definitionga hech qanday annotation qo'shmaganmiz.
+Hech qanday turdagi annotationlar mavjud emasligi sababli, biz bu yerda birinchi marta `String` bilan qilgan har qanday turdagi closureni chaqirishimiz mumkin. Agar biz `namuna_closure` ni butun(integer) son bilan chaqirishga harakat qilsak, xatoga yo'l qo'yamiz.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-03/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 13-3: Attempting to call a closure whose types
-are inferred with two different types</span>
+<span class="caption">Ro'yxat 13-3: Ikki xil turga ega bo'lgan closureni chaqirishga urinish</span>
 
-The compiler gives us this error:
+Kompilyator bizga quyidagi xatoni beradi:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-03/output.txt}}
 ```
 
-The first time we call `example_closure` with the `String` value, the compiler
-infers the type of `x` and the return type of the closure to be `String`. Those
-types are then locked into the closure in `example_closure`, and we get a type
-error when we next try to use a different type with the same closure.
+Birinchi marta `namuna_closure` `String` qiymati bilan chaqirilganda, kompilyator `x` turini va  closurening qaytish turini `String` deb hisoblaydi. Keyin bu turlar(type) `namuna_closure` bo'limida yopiladi va biz bir xil closure(yopilish) bilan boshqa turdan foydalanishga uringanimizda xatoga duch kelamiz.
 
-### Capturing References or Moving Ownership
+### Malumot olish yoki Egalik(Ownership) huquqini ko'chirish
 
-Closures can capture values from their environment in three ways, which
-directly map to the three ways a function can take a parameter: borrowing
-immutably, borrowing mutably, and taking ownership. The closure will decide
-which of these to use based on what the body of the function does with the
-captured values.
+Closurelar o'z muhitidan qiymatlarni uchta usulda olishlari mumkin, ular to'g'ridan-to'g'ri funksiya parametr olishi mumkin bo'lgan uchta usulga mos keladi: immutably borrowing (o'zgarmas borrowing(qarz olish)), mutably borrowing (o'zgaruvchan borrowing(qarz olish)) va egalik qilish(ownership). Closure funksiya tanasi(body) olingan qiymatlar bilan nima qilishiga qarab ulardan qaysi birini ishlatishni hal qiladi.
 
-In Listing 13-4, we define a closure that captures an immutable reference to
-the vector named `list` because it only needs an immutable reference to print
-the value:
+13-4 ro'yxatda biz `list` deb nomlangan vectorga immutable(o'zgarmas) referencei qamrab oluvchi closureni aniqlaymiz, chunki u qiymatni chop etish uchun faqat immutable referencega muhtoj:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-04/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-4: Defining and calling a closure that
-captures an immutable reference</span>
+<span class="caption">Ro'yxat 13-4: Buni closureni aniqlash va chaqirish
+immutable referenceni ushlaydi</span>
 
-This example also illustrates that a variable can bind to a closure definition,
-and we can later call the closure by using the variable name and parentheses as
-if the variable name were a function name.
+Ushbu misol, shuningdek, o'zgaruvchining closure definitioniga bog'lanishi mumkinligini ko'rsatadi va biz keyinchalik o'zgaruvchi nomi va qavslar yordamida o'zgaruvchi nomi funksiya nomiga o'xshab yopishni chaqirishimiz mumkin.
 
-Because we can have multiple immutable references to `list` at the same time,
-`list` is still accessible from the code before the closure definition, after
-the closure definition but before the closure is called, and after the closure
-is called. This code compiles, runs, and prints:
+Biz bir vaqtning o'zida bir nechta immutable(o'zgarmas) referencelarga ega bo'lishimiz mumkin bo'lgan `list` uchun, `list` closure definitionidan oldin, closure definitionidan keyin, lekin closure chaqirilishidan oldin va closure chaqirilgandan keyin hali ham koddan foydalanish mumkin. Ushbu kod kompilyatsiya bo'ladi, ishlaydi va chop etadi:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-04/output.txt}}
 ```
 
-Next, in Listing 13-5, we change the closure body so that it adds an element to
-the `list` vector. The closure now captures a mutable reference:
+Keyinchalik, 13-5 ro'yxatda biz closure bodysini `list` vectoriga element qo'shishi uchun o'zgartiramiz. Closure endi mutable(o'zgaruvchan) referenceni oladi:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-05/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-5: Defining and calling a closure that
-captures a mutable reference</span>
+<span class="caption">Ro'yxat 13-5: Mutable(o'zgaruvchan) referenceni ushlaydigan closureni aniqlash va chaqirish</span>
 
-This code compiles, runs, and prints:
+Ushbu kod kompilyatsiya bo'ladi, ishlaydi va chop etadi:
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-05/output.txt}}
 ```
 
-Note that there’s no longer a `println!` between the definition and the call of
-the `borrows_mutably` closure: when `borrows_mutably` is defined, it captures a
-mutable reference to `list`. We don’t use the closure again after the closure
-is called, so the mutable borrow ends. Between the closure definition and the
-closure call, an immutable borrow to print isn’t allowed because no other
-borrows are allowed when there’s a mutable borrow. Try adding a `println!`
-there to see what error message you get!
+E'tibor bering, `ozgaruvchan_borrow` closurening ta'rifi(definition) va chaqiruvi o'rtasida endi `println!` belgisi yo'q: `ozgaruvchan_borrow` aniqlanganda, u `list`ga o'zgaruvchan(mutable) referenceni oladi. Closure chaqirilgandan keyin biz closureni qayta ishlatmaymiz, shuning uchun mutable borrow(o'zgaruvchan qarz) tugaydi. Closure definationi va closure chaqiruvi o'rtasida chop etish uchun immutable(o'zgarmas) borrowga ruxsat berilmaydi, chunki mutable borrow mavjud bo'lganda boshqa borrowlarga ruxsat berilmaydi. Qaysi xato xabari borligini bilish uchun u yerga `println!` qo'shib ko'ring!
 
-If you want to force the closure to take ownership of the values it uses in the
-environment even though the body of the closure doesn’t strictly need
-ownership, you can use the `move` keyword before the parameter list.
+Agar closurening asosiy qismi ownershipga(egalik) muhtoj bo'lmasa ham, uni environmentda foydalanadigan qiymatlarga ownershiplik qilishga harakat qilmoqchi bo'lsangiz, parametrlar ro'yxatidan oldin `move` kalit so'zidan foydalanishingiz mumkin.
 
-This technique is mostly useful when passing a closure to a new thread to move
-the data so that it’s owned by the new thread. We’ll discuss threads and why
-you would want to use them in detail in Chapter 16 when we talk about
-concurrency, but for now, let’s briefly explore spawning a new thread using a
-closure that needs the `move` keyword. Listing 13-6 shows Listing 13-4 modified
-to print the vector in a new thread rather than in the main thread:
+Ushbu uslub asosan ma'lumotlarni yangi threadga tegishli bo'lishi uchun ko'chirish uchun yangi threadga closureni o'tkazishda foydalidir. Biz 16-bobda parallellik(concurrency) haqida gapirganda, thereadlarni va nima uchun ulardan foydalanishni xohlashingizni batafsil muhokama qilamiz, ammo hozircha `move` kalit so'ziga muhtoj bo'lgan closure yordamida yangi threadni yaratishni qisqacha ko'rib chiqamiz. 13-6 ro'yxat vektorni asosiy thredda emas, balki yangi threadda chop etish uchun o'zgartirilgan 13-4 ro'yxatini ko'rsatadi:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-06/src/main.rs}}
 ```
 
-<span class="caption">Listing 13-6: Using `move` to force the closure for the
-thread to take ownership of `list`</span>
+<span class="caption">Roʻyxat 13-6: `list`ga ownershiplik  qilish uchun threadni yopishni majburlash uchun `move` dan foydalanish</span>
 
-We spawn a new thread, giving the thread a closure to run as an argument. The
-closure body prints out the list. In Listing 13-4, the closure only captured
-`list` using an immutable reference because that's the least amount of access
-to `list` needed to print it. In this example, even though the closure body
-still only needs an immutable reference, we need to specify that `list` should
-be moved into the closure by putting the `move` keyword at the beginning of the
-closure definition. The new thread might finish before the rest of the main
-thread finishes, or the main thread might finish first. If the main thread
-maintained ownership of `list` but ended before the new thread did and dropped
-`list`, the immutable reference in the thread would be invalid. Therefore, the
-compiler requires that `list` be moved into the closure given to the new thread
-so the reference will be valid. Try removing the `move` keyword or using `list`
-in the main thread after the closure is defined to see what compiler errors you
-get!
+Biz argument sifatida ishlash uchun threadni yopish(closure) imkonini berib, yangi threadni yaratamiz. Closure tanasi(body) listni chop etadi. Roʻyxat 13-4, closure faqat oʻzgarmas(immutable) reference yordamida `list`ni yozib oldi, chunki bu uni chop etish uchun zarur boʻlgan `list`ga kirishning eng kam miqdori. Ushbu misolda, closure tanasi(body) hali ham faqat o'zgarmas(immutable) referencega muhtoj bo'lsa ham, biz closure definationing boshiga `move` kalit so'zini qo'yish orqali `list` closurega ko'chirilishi kerakligini ko'rsatishimiz kerak. Yangi thread asosiy threadning qolgan qismi tugashidan oldin tugashi yoki asosiy thread birinchi bo'lib tugashi mumkin. Agar asosiy thread `list`ga ownershiplikni saqlab qolgan boʻlsa-da, lekin yangi thread paydo boʻlishidan oldin tugasa va `list`ni tashlab qoʻysa, threaddagi immutable(oʻzgarmas) reference yaroqsiz boʻladi. Shuning uchun, kompilyator `list`ni yangi threadga berilgan closurega ko'chirishni talab qiladi, shuning uchun reference haqiqiy bo'ladi. Kompilyatorda qanday xatolarga yo'l qo'yganingizni ko'rish uchun closure aniqlangandan so'ng, `move` kalit so'zini olib tashlang yoki asosiy threaddagi `list` dan foydalaning!
 
 <!-- Old headings. Do not remove or links may break. -->
 <a id="storing-closures-using-generic-parameters-and-the-fn-traits"></a>
 <a id="limitations-of-the-cacher-implementation"></a>
 <a id="moving-captured-values-out-of-the-closure-and-the-fn-traits"></a>
 
-### Moving Captured Values Out of Closures and the `Fn` Traits
+### Qabul qilingan qiymatlarni closuredan va `Fn` traitlaridan ko'chirish
 
-Once a closure has captured a reference or captured ownership of a value from
-the environment where the closure is defined (thus affecting what, if anything,
-is moved *into* the closure), the code in the body of the closure defines what
-happens to the references or values when the closure is evaluated later (thus
-affecting what, if anything, is moved *out of* the closure). A closure body can
+Closure ma'lumotnomani qo'lga kiritgandan so'ng(shunday qilib, agar biror narsa bo'lsa, closurega ko'chirilgan narsaga ta'sir qiladi) yoki closure aniqlangan environmentdan qiymatga ownershiplikni qo'lga kiritgandan so'ng,(agar biror narsa bo'lsa, closuredan ko'chirilgan narsaga ta'sir qiladi) closurening asosiy qismidagi kod closure keyinroq baholanganda referencelar yoki qiymatlar bilan nima sodir bo'lishini belgilaydi. 
+
+A closure body can
 do any of the following: move a captured value out of the closure, mutate the
 captured value, neither move nor mutate the value, or capture nothing from the
 environment to begin with.
