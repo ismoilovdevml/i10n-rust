@@ -1,13 +1,13 @@
-/// Adds one to the number given.
+/// Berilgan raqamga bitta qo'shadi.
 ///
-/// # Examples
+/// # Misollar
 ///
 /// ```
-/// let arg = 5;
-/// let answer = my_crate::add_one(arg);
+/// let argument = 5;
+/// let javob = my_crate::bir_qoshish(argument);
 ///
-/// assert_eq!(6, answer);
+/// assert_eq!(6, javob);
 /// ```
-pub fn add_one(x: i32) -> i32 {
+pub fn bir_qoshish(x: i32) -> i32 {
     x + 1
 }

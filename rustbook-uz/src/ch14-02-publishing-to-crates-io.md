@@ -1,78 +1,40 @@
-## Publishing a Crate to Crates.io
+## Crateni Crates.io-ga nashr qilish
 
-We’ve used packages from [crates.io](https://crates.io/)<!-- ignore --> as
-dependencies of our project, but you can also share your code with other people
-by publishing your own packages. The crate registry at
-[crates.io](https://crates.io/)<!-- ignore --> distributes the source code of
-your packages, so it primarily hosts code that is open source.
+Biz [crates.io](https://crates.io/)<!-- ignore --> paketlaridan loyihamizga dependency sifatida foydalandik, lekin siz oʻz paketlaringizni nashr(publish) qilish orqali kodingizni boshqa odamlar bilan ham baham koʻrishingiz mumkin. [crates.io](https://crates.io/)<!-- ignore --> saytidagi crate registri paketlaringizning manba kodini tarqatadi, shuning uchun u birinchi navbatda open source kodni saqlaydi.
 
-Rust and Cargo have features that make your published package easier for people
-to find and use. We’ll talk about some of these features next and then explain
-how to publish a package.
+Rust va Cargoda publish etilgan paketingizni odamlar topishi va undan foydalanishini osonlashtiradigan funksiyalar mavjud. Biz ushbu xususiyatlarning ba'zilari haqida keyin gaplashamiz va keyin paketni qanday nashr(publish) qilishni tushuntiramiz.
 
-### Making Useful Documentation Comments
+### Foydali hujjatlarga(documentation) sharhlar(comment) qo'yish
 
-Accurately documenting your packages will help other users know how and when to
-use them, so it’s worth investing the time to write documentation. In Chapter
-3, we discussed how to comment Rust code using two slashes, `//`. Rust also has
-a particular kind of comment for documentation, known conveniently as a
-*documentation comment*, that will generate HTML documentation. The HTML
-displays the contents of documentation comments for public API items intended
-for programmers interested in knowing how to *use* your crate as opposed to how
-your crate is *implemented*.
+Paketlaringizni to'g'ri hujjatlashtirish boshqa foydalanuvchilarga ulardan qanday va qachon foydalanishni bilishga yordam beradi, shuning uchun texnik hujjatlarni yozish uchun vaqt sarflashga arziydi. 3-bobda biz Rust kodini ikkita slash `//` yordamida qanday izohlashni(comment) muhokama qildik. Rust shuningdek, HTML hujjatlarini yaratadigan *documentation comment* deb nomlanuvchi hujjatlar uchun o'ziga xos izohga ega. HTML sizning cratengiz qanday *impelemnent qilinganidan* farqli o'laroq, sizning cratengizdan qanday *foydalanishni* bilishga qiziqqan dasturchilar uchun mo'ljallangan umumiy API elementlari uchun hujjat sharhlari mazmunini ko'rsatadi.
 
-Documentation comments use three slashes, `///`, instead of two and support
-Markdown notation for formatting the text. Place documentation comments just
-before the item they’re documenting. Listing 14-1 shows documentation comments
-for an `add_one` function in a crate named `my_crate`.
+Hujjatlarga sharhlar ikkita o'rniga uchta slashdan foydalaniladi, `///` va matnni formatlash uchun Markdown notationni qo'llab-quvvatlaydi. Hujjatlarga sharhlarni ular hujjatlashtirilayotgan element oldiga qo'ying. 14-1 Ro'yxatda `my_crate` nomli cratedagi `add_one` funksiyasi uchun hujjat sharhlari ko'rsatilgan.
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-01/src/lib.rs}}
 ```
 
-<span class="caption">Listing 14-1: A documentation comment for a
-function</span>
+<span class="caption">Ro'yxat 14-1: Funksiya uchun hujjat sharhi(documentation comment</span>
 
-Here, we give a description of what the `add_one` function does, start a
-section with the heading `Examples`, and then provide code that demonstrates
-how to use the `add_one` function. We can generate the HTML documentation from
-this documentation comment by running `cargo doc`. This command runs the
-`rustdoc` tool distributed with Rust and puts the generated HTML documentation
-in the *target/doc* directory.
+Bu yerda biz `bir_qoshish` funksiyasi nima qilishini tavsiflab beramiz, `Misollar` sarlavhasi bilan bo‘limni boshlaymiz, so‘ngra `bir_qoshish`  funksiyasidan qanday foydalanishni ko‘rsatadigan kodni taqdim etamiz. Biz ushbu hujjat sharhidan HTML hujjatlarini `cargo doc`ni ishga tushirish orqali yaratishimiz mumkin. Bu buyruq Rust bilan tarqatilgan `rustdoc` toolini ishga tushiradi va yaratilgan HTML hujjatlarini *target/doc* jildiga joylashtiradi.
 
-For convenience, running `cargo doc --open` will build the HTML for your
-current crate’s documentation (as well as the documentation for all of your
-crate’s dependencies) and open the result in a web browser. Navigate to the
-`add_one` function and you’ll see how the text in the documentation comments is
-rendered, as shown in Figure 14-1:
+Qulaylik uchun `cargo doc --open` ni ishga tushirish joriy crate hujjatlari uchun HTML-ni yaratadi (shuningdek, cratengizning barcha dependencilari uchun hujjatlar) va natijani veb-brauzerda ochadi. `bir_qoshish` funksiyasiga o‘ting va 14-1-rasmda ko‘rsatilganidek, hujjat sharhlaridagi matn qanday ko‘rsatilishini ko‘rasiz:
 
-<img alt="Rendered HTML documentation for the `add_one` function of `my_crate`" src="img/trpl14-01.png" class="center" />
+<img alt="Rendered HTML documentation for the `add_one` function of `my_crate`" src="img/trlpuz1.png" class="center" />
 
-<span class="caption">Figure 14-1: HTML documentation for the `add_one`
-function</span>
+<span class="caption">14-1-Rasm: `bir_qoshish` funksiyasi uchun HTML hujjatlari</span>
 
-#### Commonly Used Sections
+#### Tez-tez ishlatiladigan bo'limlar
 
-We used the `# Examples` Markdown heading in Listing 14-1 to create a section
-in the HTML with the title “Examples.” Here are some other sections that crate
-authors commonly use in their documentation:
+Biz HTML-da `Misollar` sarlavhali bo'lim yaratish uchun 14-1 ro'yxatdagi `# Misollar` Markdown sarlavhasidan foydalandik. Mualliflar o'z hujjatlarida tez-tez foydalanadigan boshqa bo'limlar:
 
-* **Panics**: The scenarios in which the function being documented could
-  panic. Callers of the function who don’t want their programs to panic should
-  make sure they don’t call the function in these situations.
-* **Errors**: If the function returns a `Result`, describing the kinds of
-  errors that might occur and what conditions might cause those errors to be
-  returned can be helpful to callers so they can write code to handle the
-  different kinds of errors in different ways.
-* **Safety**: If the function is `unsafe` to call (we discuss unsafety in
-  Chapter 19), there should be a section explaining why the function is unsafe
-  and covering the invariants that the function expects callers to uphold.
+* **Panics**: Hujjat yozilayotan funksiya senariylari panic qo'zg'atishi mumkin. O'z dasturlari panic qo'zg'ashini istamaydigan funksiyaning murojaat qiluvchilari bunday holatlarda funksiyani chaqirmasliklariga ishonch hosil qilishlari kerak.
+* **Errors**: Agar funksiya `Result` ni qaytarsa, yuzaga kelishi mumkin bo'lgan xatolar turlarini tavsiflash va bu xatolar qaytarilishiga qanday sharoitlar sabab bo'lishi mumkinligi murojaat qiluvchilar uchun foydali bo'lishi mumkin, shuning uchun ular turli xil xatolarni turli yo'llar bilan hal qilish uchun kod yozishlari mumkin.
+* **Safety**: Agar funksiya murojaat qilish uchun `unsafe`  bo'lsa (biz 19-bobda xavfsizlikni muhokama qilamiz), funksiya nima uchun xavfli ekanligini tushuntiruvchi bo'lim bo'lishi kerak va funksiya murojaat qiluvchilar qo'llab-quvvatlashini kutayotgan o'zgarmaslarni qamrab oladi.
 
-Most documentation comments don’t need all of these sections, but this is a
-good checklist to remind you of the aspects of your code users will be
-interested in knowing about.
+Ko'pgina hujjatlar sharhlari ushbu bo'limlarning barchasiga muhtoj emas, ammo bu sizning kodingiz foydalanuvchilari bilishni qiziqtiradigan jihatlarni eslatish uchun yaxshi nazorat ro'yxati.
 
 #### Documentation Comments as Tests
 
@@ -115,7 +77,7 @@ crate that contains the `add_one` function, we add documentation comments that
 start with `//!` to the beginning of the *src/lib.rs* file, as shown in Listing
 14-2:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-02/src/lib.rs:here}}
@@ -172,7 +134,7 @@ Within this library are two modules: a `kinds` module containing two enums
 named `PrimaryColor` and `SecondaryColor` and a `utils` module containing a
 function named `mix`, as shown in Listing 14-3:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground,test_harness
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-03/src/lib.rs:here}}
@@ -220,7 +182,7 @@ To remove the internal organization from the public API, we can modify the
 `art` crate code in Listing 14-3 to add `pub use` statements to re-export the
 items at the top level, as shown in Listing 14-5:
 
-<span class="filename">Filename: src/lib.rs</span>
+<span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-05/src/lib.rs:here}}
