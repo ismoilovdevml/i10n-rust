@@ -8,7 +8,7 @@ Rust va Cargoda publish etilgan paketingizni odamlar topishi va undan foydalanis
 
 Paketlaringizni to'g'ri hujjatlashtirish boshqa foydalanuvchilarga ulardan qanday va qachon foydalanishni bilishga yordam beradi, shuning uchun texnik hujjatlarni yozish uchun vaqt sarflashga arziydi. 3-bobda biz Rust kodini ikkita slash `//` yordamida qanday izohlashni(comment) muhokama qildik. Rust shuningdek, HTML hujjatlarini yaratadigan *documentation comment* deb nomlanuvchi hujjatlar uchun o'ziga xos izohga ega. HTML sizning cratengiz qanday *impelemnent qilinganidan* farqli o'laroq, sizning cratengizdan qanday *foydalanishni* bilishga qiziqqan dasturchilar uchun mo'ljallangan umumiy API elementlari uchun hujjat sharhlari mazmunini ko'rsatadi.
 
-Hujjatlarga sharhlar ikkita o'rniga uchta slashdan foydalaniladi, `///` va matnni formatlash uchun Markdown notationni qo'llab-quvvatlaydi. Hujjatlarga sharhlarni ular hujjatlashtirilayotgan element oldiga qo'ying. 14-1 Ro'yxatda `my_crate` nomli cratedagi `add_one` funksiyasi uchun hujjat sharhlari ko'rsatilgan.
+Hujjatlarga sharhlar ikkita o'rniga uchta slashdan foydalaniladi, `///` va matnni formatlash uchun Markdown notationni qo'llab-quvvatlaydi. Hujjatlarga sharhlarni ular hujjatlashtirilayotgan element oldiga qo'ying. 14-1 Ro'yxatda `my_crate` nomli cratedagi `bir_qoshish` funksiyasi uchun hujjat sharhlari ko'rsatilgan.
 
 <span class="filename">Fayl nomi: src/lib.rs</span>
 
@@ -22,7 +22,7 @@ Bu yerda biz `bir_qoshish` funksiyasi nima qilishini tavsiflab beramiz, `Misolla
 
 Qulaylik uchun `cargo doc --open` ni ishga tushirish joriy crate hujjatlari uchun HTML-ni yaratadi (shuningdek, cratengizning barcha dependencilari uchun hujjatlar) va natijani veb-brauzerda ochadi. `bir_qoshish` funksiyasiga o‘ting va 14-1-rasmda ko‘rsatilganidek, hujjat sharhlaridagi matn qanday ko‘rsatilishini ko‘rasiz:
 
-<img alt="Rendered HTML documentation for the `add_one` function of `my_crate`" src="img/trlpuz1.png" class="center" />
+<img alt="Rendered HTML documentation for the `bir_qoshish` function of `my_crate`" src="img/trlpuz1.png" class="center" />
 
 <span class="caption">14-1-Rasm: `bir_qoshish` funksiyasi uchun HTML hujjatlari</span>
 
@@ -36,15 +36,9 @@ Biz HTML-da `Misollar` sarlavhali bo'lim yaratish uchun 14-1 ro'yxatdagi `# Miso
 
 Ko'pgina hujjatlar sharhlari ushbu bo'limlarning barchasiga muhtoj emas, ammo bu sizning kodingiz foydalanuvchilari bilishni qiziqtiradigan jihatlarni eslatish uchun yaxshi nazorat ro'yxati.
 
-#### Documentation Comments as Tests
+#### Texnik hujjatlarga sharhlar test sifatida
 
-Adding example code blocks in your documentation comments can help demonstrate
-how to use your library, and doing so has an additional bonus: running `cargo
-test` will run the code examples in your documentation as tests! Nothing is
-better than documentation with examples. But nothing is worse than examples
-that don’t work because the code has changed since the documentation was
-written. If we run `cargo test` with the documentation for the `add_one`
-function from Listing 14-1, we will see a section in the test results like this:
+Hujjatlarga sharhlaringizga(documentation comment) misol kod bloklarini qo'shish kutubxonangizdan(library) qanday foydalanishni ko'rsatishga yordam beradi va bu qo'shimcha bonusga ega bo'ladi: `cargo test` ishga tushirish hujjatlaringizdagi kod misollarini test sifatida ishga tushiradi! Hech narsa misollar bilan hujjatlashtirishdan yaxshiroq emas. Lekin hech narsa ishlamaydigan misollardan ko'ra yomonroq emas, chunki hujjatlar yozilgandan beri kod o'zgargan. Agar biz 14-1 roʻyxatdagi `bir_qoshish` funksiyasi uchun hujjatlar bilan `cargo test` oʻtkazsak, test natijalarida quyidagi boʻlimni koʻramiz:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-01/
@@ -56,26 +50,18 @@ copy just the doc-tests section below
    Doc-tests my_crate
 
 running 1 test
-test src/lib.rs - add_one (line 5) ... ok
+test src/lib.rs - bir_qoshish (line 5) ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
 ```
 
-Now if we change either the function or the example so the `assert_eq!` in the
-example panics and run `cargo test` again, we’ll see that the doc tests catch
-that the example and the code are out of sync with each other!
+Endi funksiyani yoki misolni, misoldagi `assert_eq!` panic qo'zg'atadigan tarzda o'zgartirsak va yana `cargo test` ishga tushirsak, hujjat testlari misol va kod bir-biri bilan sinxronlanmaganligini aniqlaymiz.!
 
-#### Commenting Contained Items
+#### O'z ichiga olgan elementlarni sharhlash
 
-The style of doc comment `//!` adds documentation to the item that contains the
-comments rather than to the items following the comments. We typically use
-these doc comments inside the crate root file (*src/lib.rs* by convention) or
-inside a module to document the crate or the module as a whole.
+Hujjat sharhining uslubi `//!` hujjatni sharhlardan keyingi elementlarga emas, balki sharhlarni o'z ichiga olgan elementga qo'shadi. Biz odatda bu doc izohlaridan cratening ildiz(root) faylida (odatda *src/lib.rs*) yoki modul ichida crateni yoki butun modulni hujjatlash uchun foydalanamiz.
 
-For example, to add documentation that describes the purpose of the `my_crate`
-crate that contains the `add_one` function, we add documentation comments that
-start with `//!` to the beginning of the *src/lib.rs* file, as shown in Listing
-14-2:
+Masalan, `bir_qoshish` funksiyasini o'z ichiga olgan `my_crate` cratesi maqsadini tavsiflovchi hujjatlarni qo'shish uchun biz *src/lib.rs* faylining boshiga `//!` bilan boshlanadigan hujjat sharhlarini qo`shamiz, 14-2 ro'yxatda ko'rsatilganidek:
 
 <span class="filename">Fayl nomi: src/lib.rs</span>
 
@@ -83,104 +69,63 @@ start with `//!` to the beginning of the *src/lib.rs* file, as shown in Listing
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-02/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 14-2: Documentation for the `my_crate` crate as a
-whole</span>
+<span class="caption">Ro'yxat 14-2: Umuman olganda, `my_crate` cratesi uchun hujjatlar</span>
 
-Notice there isn’t any code after the last line that begins with `//!`. Because
-we started the comments with `//!` instead of `///`, we’re documenting the item
-that contains this comment rather than an item that follows this comment. In
-this case, that item is the *src/lib.rs* file, which is the crate root. These
-comments describe the entire crate.
+E'tibor bering, `//!` bilan boshlanadigan oxirgi qatordan keyin hech qanday kod yo'q. Fikrlarni `///` o'rniga `//!` bilan boshlaganimiz sababli, biz ushbu sharhdan keyingi elementni emas, balki ushbu sharhni o'z ichiga olgan elementni hujjatlashtirmoqdamiz. Bunday holda, bu element crate ildizi(root) bo'lgan *src/lib.rs* faylidir. Ushbu sharhlar butun crateni tasvirlaydi.
 
-When we run `cargo doc --open`, these comments will display on the front
-page of the documentation for `my_crate` above the list of public items in the
-crate, as shown in Figure 14-2:
+`cargo doc --open`ni ishga tushirganimizda, bu izohlar 14-2-rasmda ko‘rsatilganidek, `my_crate` hujjatlarining birinchi sahifasida cratedagi public itemlar ro‘yxati ustida ko'rsatiladi:
 
-<img alt="Rendered HTML documentation with a comment for the crate as a whole" src="img/trpl14-02.png" class="center" />
+<img alt="Rendered HTML documentation with a comment for the crate as a whole" src="img/trlpuz2.png" class="center" />
 
-<span class="caption">Figure 14-2: Rendered documentation for `my_crate`,
-including the comment describing the crate as a whole</span>
+<span class="caption">14-2-rasm: `my_crate` uchun taqdim etilgan hujjatlar, jumladan, crateni bir butun sifatida tavsiflovchi sharh</span>
 
-Documentation comments within items are useful for describing crates and
-modules especially. Use them to explain the overall purpose of the container to
-help your users understand the crate’s organization.
+Elementlar ichidagi hujjat sharhlari, ayniqsa, cratelar va modullarni tavsiflash uchun foydalidir. Foydalanuvchilarga cratening tashkil etilishini tushunishlariga yordam berish uchun konteynerning umumiy maqsadini tushuntirish uchun ulardan foydalaning.
 
-### Exporting a Convenient Public API with `pub use`
+### `pub use` bilan qulay Public APIni eksport qilish
 
-The structure of your public API is a major consideration when publishing a
-crate. People who use your crate are less familiar with the structure than you
-are and might have difficulty finding the pieces they want to use if your crate
-has a large module hierarchy.
+Public API structi crateni nashr qilishda muhim ahamiyatga ega. Sizning cratengizdan foydalanadigan odamlar structureni sizdan ko'ra kamroq bilishadi va agar sizning cratengiz katta modul ierarxiyasiga ega bo'lsa, ular foydalanmoqchi bo'lgan qismlarni topishda qiyinchiliklarga duch kelishlari mumkin.
 
-In Chapter 7, we covered how to make items public using the `pub` keyword, and
-bring items into a scope with the `use` keyword. However, the structure that
-makes sense to you while you’re developing a crate might not be very convenient
-for your users. You might want to organize your structs in a hierarchy
-containing multiple levels, but then people who want to use a type you’ve
-defined deep in the hierarchy might have trouble finding out that type exists.
-They might also be annoyed at having to enter `use`
-`my_crate::some_module::another_module::UsefulType;` rather than `use`
-`my_crate::UsefulType;`.
+7-bobda biz `pub` kalit so‘zi yordamida itemlarni qanday qilib hammaga ochiq(public) qilish va `use` kalit so‘zi bilan obyektlarni qamrovga(scope) kiritishni ko‘rib chiqdik.Biroq, crateni ishlab chiqishda sizga mantiqiy bo'lgan structure foydalanuvchilaringiz uchun unchalik qulay bo'lmasligi mumkin. Siz structlaringizni bir nechta darajalarni o'z ichiga olgan ierarxiyada tartibga solishni xohlashingiz mumkin, ammo keyin siz ierarxiyada chuqur aniqlagan turdan foydalanmoqchi bo'lgan odamlar ushbu tur mavjudligini aniqlashda muammolarga duch kelishlari mumkin.
+Ular, shuningdek, `use` `my_crate::FoydaliTur;` o'rniga `use` ``my_crate::biror_modul::boshqa_modul::FoydaliTur;`` ni kiritishlari kerakligidan bezovtalanishi mumkin.
 
-The good news is that if the structure *isn’t* convenient for others to use
-from another library, you don’t have to rearrange your internal organization:
-instead, you can re-export items to make a public structure that’s different
-from your private structure by using `pub use`. Re-exporting takes a public
-item in one location and makes it public in another location, as if it were
-defined in the other location instead.
+Yaxshi xabar shundaki, agar sturcture boshqa kutubxonadan(library) foydalanishi uchun *qulay bo'lmasa*, ichki organizationgizni o'zgartirishingiz shart emas: Buning o'rniga, `pub use` dan foydalanib, private structuredan farq qiladigan public structure yaratish uchun itemlarni qayta eksport qilishingiz mumkin. Qayta eksport qilish public ob'ektni bir joyda oladi va uni boshqa joyda hammaga ochiq(public) qiladi, go'yo u boshqa joyda aniqlangandek.
 
-For example, say we made a library named `art` for modeling artistic concepts.
-Within this library are two modules: a `kinds` module containing two enums
-named `PrimaryColor` and `SecondaryColor` and a `utils` module containing a
-function named `mix`, as shown in Listing 14-3:
-
+Masalan, badiiy tushunchalarni modellashtirish uchun `rassom` nomli kutubxona(library) yaratdik, deylik.
+Ushbu kutubxona ichida ikkita modul mavjud: 14-3 roʻyxatda koʻrsatilganidek, `AsosiyRang` va `IkkilamchiRang` nomli ikkita raqamni oʻz ichiga olgan `turlar` moduli va `aralashtirish` nomli funksiyani oʻz ichiga olgan `yordamchi` moduli:
 <span class="filename">Fayl nomi: src/lib.rs</span>
 
 ```rust,noplayground,test_harness
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-03/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 14-3: An `art` library with items organized into
-`kinds` and `utils` modules</span>
+<span class="caption">Roʻyxat 14-3: `turlar` va `yordamchi` modullariga ajratilgan `rassom` kutubxonasi</span>
 
-Figure 14-3 shows what the front page of the documentation for this crate
-generated by `cargo doc` would look like:
+14-3-rasmda `cargo doc` tomonidan yaratilgan ushbu crate uchun hujjatlarning bosh sahifasi qanday ko'rinishi ko'rsatilgan:
 
 <img alt="Rendered documentation for the `art` crate that lists the `kinds` and `utils` modules" src="img/trpl14-03.png" class="center" />
 
-<span class="caption">Figure 14-3: Front page of the documentation for `art`
-that lists the `kinds` and `utils` modules</span>
+<span class="caption">14-3-rasm: `turlar` va `yordamchi` modullari ro‘yxati keltirilgan `rassom` hujjatlarining bosh sahifasi</span>
 
-Note that the `PrimaryColor` and `SecondaryColor` types aren’t listed on the
-front page, nor is the `mix` function. We have to click `kinds` and `utils` to
-see them.
+E'tibor bering, `AsosiyRang` va `IkkilamchiRang` turlari birinchi sahifada ko'rsatilmagan va `aralashtirish` funksiyasi ham mavjud emas. Ularni ko'rish uchun `turlar` va `yordamchi` ni bosishimiz kerak.
 
-Another crate that depends on this library would need `use` statements that
-bring the items from `art` into scope, specifying the module structure that’s
-currently defined. Listing 14-4 shows an example of a crate that uses the
-`PrimaryColor` and `mix` items from the `art` crate:
+Ushbu kutubxonaga bog'liq bo'lgan boshqa cratega `rassom` dan elementlarni qamrab oladigan, hozirda aniqlangan modul stryucturedan ko'rsatadigan `use` statementlari kerak bo'ladi. 14-4 roʻyxatda `rassom` cratesidagi `AsosiyRang` va `aralashtirish` elementlaridan foydalanadigan crate misoli koʻrsatilgan:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-04/src/main.rs}}
 ```
 
-<span class="caption">Listing 14-4: A crate using the `art` crate’s items with
-its internal structure exported</span>
+<span class="caption">Roʻyxat 14-4: `rassom` crate itemlaridan foydalanilgan, ichki stuctureni eksport qilingan crate</span>
 
-The author of the code in Listing 14-4, which uses the `art` crate, had to
-figure out that `PrimaryColor` is in the `kinds` module and `mix` is in the
-`utils` module. The module structure of the `art` crate is more relevant to
-developers working on the `art` crate than to those using it. The internal
+`rassom` cratesidan foydalanadigan 14-4-Ro'yxatdagi kod muallifi `AsosiyRang` `turlar` modulida, `aralashtirish` esa `yordamchi` modulida ekanligini aniqlashi kerak edi. `rassom` cratening modul stucturesi undan foydalanadiganlarga qaraganda `rassom` crate ustida ishlayotgan developerlarga ko'proq mos keladi. The internal
 structure doesn’t contain any useful information for someone trying to
 understand how to use the `art` crate, but rather causes confusion because
 developers who use it have to figure out where to look, and must specify the
 module names in the `use` statements.
+Ichki stuctureda `rassom` cratesidan qanday foydalanishni tushunishga urinayotganlar uchun foydali ma'lumotlar mavjud emas, aksincha, chalkashliklarga sabab bo'ladi, chunki undan foydalanadigan developerlar qayerga qarash kerakligini aniqlashlari kerak va `use` statementlarida modul nomlarini ko'rsatishi kerak.
 
-To remove the internal organization from the public API, we can modify the
-`art` crate code in Listing 14-3 to add `pub use` statements to re-export the
-items at the top level, as shown in Listing 14-5:
+Ichki organizationni public API’dan olib tashlash uchun biz 14-5 ro‘yxatda ko‘rsatilganidek, top leveldagi elementlarni qayta eksport qilish uchun `pub use` statementlarini qo‘shish uchun 14-3 ro‘yxatdagi `rassom` crate kodini o‘zgartirishimiz mumkin:
 
 <span class="filename">Fayl nomi: src/lib.rs</span>
 
@@ -188,89 +133,53 @@ items at the top level, as shown in Listing 14-5:
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-05/src/lib.rs:here}}
 ```
 
-<span class="caption">Listing 14-5: Adding `pub use` statements to re-export
-items</span>
+<span class="caption">Ro'yxat 14-5: Elementlarni qayta eksport qilish uchun `pub use` statementlarini qo'shish</span>
 
-The API documentation that `cargo doc` generates for this crate will now list
-and link re-exports on the front page, as shown in Figure 14-4, making the
-`PrimaryColor` and `SecondaryColor` types and the `mix` function easier to find.
+Ushbu crate uchun `cargo doc` yaratadigan API hujjatlari Endi 14-4-rasmda ko'rsatilganidek, re-exportlarni birinchi sahifada listga oling va bog'lang, bu `AsosiyRang` va `IkkilamchiRang` turlarini va `aralashtirish` funksiyasini topishni osonlashtiradi.
 
-<img alt="Rendered documentation for the `art` crate with the re-exports on the front page" src="img/trpl14-04.png" class="center" />
+<img alt="Rendered documentation for the `art` crate with the re-exports on the front page" src="img/trpluz14.png" class="center" />
 
-<span class="caption">Figure 14-4: The front page of the documentation for `art`
-that lists the re-exports</span>
+<span class="caption">14-4-rasm: re-exportlar ro'yxati keltirilgan `rassom` hujjatlarining birinchi sahifasi</span>
 
-The `art` crate users can still see and use the internal structure from Listing
-14-3 as demonstrated in Listing 14-4, or they can use the more convenient
-structure in Listing 14-5, as shown in Listing 14-6:
+`rassom` crate foydalanuvchilari hali ham 14-4 roʻyxatda koʻrsatilganidek, 14-3 roʻyxatdagi ichki(internal) structureni koʻrishlari va foydalanishlari mumkin yoki ular 14-6 roʻyxatda koʻrsatilganidek, 14-5 roʻyxatdagi qulayroq structuredan foydalanishlari mumkin:
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">Fayl nomi: src/main.rs</span>
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-06/src/main.rs:here}}
 ```
 
-<span class="caption">Listing 14-6: A program using the re-exported items from
-the `art` crate</span>
+<span class="caption">Ro'yxat 14-6: `rassom` cratesidan re-export(qayta eksport) qilingan itemlarni ishlatadigan dastur</span>
 
-In cases where there are many nested modules, re-exporting the types at the top
-level with `pub use` can make a significant difference in the experience of
-people who use the crate. Another common use of `pub use` is to re-export
-definitions of a dependency in the current crate to make that crate's
-definitions part of your crate’s public API.
+Ko'plab ichki modullar mavjud bo'lsa, `pub use` bilan top leveldagi turlarni qayta eksport(re-export) qilish cratedan foydalanadigan foydalanuvchilar tajribasida sezilarli o'zgarishlarga olib kelishi mumkin. `pub use` ning yana bir keng tarqalgan qoʻllanilishi bu crate deifinationlarini cratengizning public API qismiga aylantirish uchun joriy cratedagi dependency definitionlarini qayta eksport qilishdir.
 
-Creating a useful public API structure is more of an art than a science, and
-you can iterate to find the API that works best for your users. Choosing `pub
-use` gives you flexibility in how you structure your crate internally and
-decouples that internal structure from what you present to your users. Look at
-some of the code of crates you’ve installed to see if their internal structure
-differs from their public API.
+Foydali public API stucturesini yaratish fandan ko'ra ko'proq san'atdir va siz foydalanuvchilaringiz uchun eng mos keladigan APIni topish uchun takrorlashingiz mumkin. `pub use` ni tanlash sizga cratengizni ichki stuctureda moslashuvchanlikni beradi va bu ichki stuctureni foydalanuvchilarga taqdim etgan narsadan ajratadi. O'rnatgan ba'zi cratelar kodlarini ko'rib chiqing, ularning ichki tuzilishi(internal structure) public APIdan farq qiladimi yoki yo'qmi.
 
-### Setting Up a Crates.io Account
+### Crates.io da account sozlash
 
-Before you can publish any crates, you need to create an account on
-[crates.io](https://crates.io/)<!-- ignore --> and get an API token. To do so,
-visit the home page at [crates.io](https://crates.io/)<!-- ignore --> and log
-in via a GitHub account. (The GitHub account is currently a requirement, but
-the site might support other ways of creating an account in the future.) Once
-you’re logged in, visit your account settings at
-[https://crates.io/me/](https://crates.io/me/)<!-- ignore --> and retrieve your
-API key. Then run the `cargo login` command with your API key, like this:
+Har qanday cratelarni nashr qilishdan oldin [crates.io](https://crates.io/)<!-- ignore --> saytida hisob(account) yaratishingiz va API tokenini olishingiz kerak.
+Buning uchun [crates.io](https://crates.io/)<!-- ignore --> saytidagi bosh sahifaga tashrif buyuring va GitHub hisob qaydnomasi(account) orqali tizimga kiring. (GitHub hisobi hozirda talab hisoblanadi, ammo sayt kelajakda hisob yaratishning boshqa usullarini qo'llab-quvvatlashi mumkin.), Tizimga kirganingizdan so'ng,[https://crates.io/me/](https://crates.io/me/)<!-- ignore --> sahifasidagi hisob sozlamalariga tashrif buyuring va API kalitingizni(key) oling. Keyin API kalitingiz bilan `cargo login` buyrug'ini bajaring, masalan:
 
 ```console
 $ cargo login abcdefghijklmnopqrstuvwxyz012345
 ```
 
-This command will inform Cargo of your API token and store it locally in
-*~/.cargo/credentials*. Note that this token is a *secret*: do not share it
-with anyone else. If you do share it with anyone for any reason, you should
-revoke it and generate a new token on [crates.io](https://crates.io/)<!-- ignore
--->.
+Bu buyruq Cargoga API tokeningiz haqida xabar beradi va uni *~/.cargo/credentials* da saqlaydi. E'tibor bering, bu token *secret*: uni boshqa hech kim bilan baham ko'rmang. Agar biron-bir sababga ko'ra uni kimdir bilan baham ko'rsangiz, uni bekor qilishingiz va [crates.io](https://crates.io/)<!-- ignore --> saytida yangi token yaratishingiz kerak.
 
-### Adding Metadata to a New Crate
+### Yangi cratega metadata qo'shish
 
-Let’s say you have a crate you want to publish. Before publishing, you’ll need
-to add some metadata in the `[package]` section of the crate’s *Cargo.toml*
-file.
+Aytaylik, sizda nashr qilmoqchi bo'lgan cratengiz bor. Nashr qilishdan oldin cratening *Cargo.toml* faylining `[package]` boʻlimiga metamaʼlumotlar qoʻshishingiz kerak boʻladi.
 
-Your crate will need a unique name. While you’re working on a crate locally,
-you can name a crate whatever you’d like. However, crate names on
-[crates.io](https://crates.io/)<!-- ignore --> are allocated on a first-come,
-first-served basis. Once a crate name is taken, no one else can publish a crate
-with that name. Before attempting to publish a crate, search for the name you
-want to use. If the name has been used, you will need to find another name and
-edit the `name` field in the *Cargo.toml* file under the `[package]` section to
-use the new name for publishing, like so:
+Sizning cratengizga noyob nom kerak bo'ladi. Mahalliy(local) miqyosda crate ustida ishlayotganingizda, cratega xohlaganingizcha nom berishingiz mumkin. Biroq, [crates.io](https://crates.io/)<!-- ignore --> saytidagi crate nomlari birinchi kelganda, birinchi navbatda beriladi. Crate nomi olingandan so'ng, boshqa hech kim bu nom bilan crateni nashr eta olmaydi. Crateni nashr etishga urinishdan oldin foydalanmoqchi bo'lgan nomni qidiring. Agar nom ishlatilgan bo'lsa, nashr qilish uchun yangi nomdan foydalanish uchun boshqa nom topib, *Cargo.toml* faylida `[package]` bo'limi ostidagi `name` maydonini tahrirlashingiz kerak bo'ladi:
 
-<span class="filename">Filename: Cargo.toml</span>
+<span class="filename">Fayl nomi: Cargo.toml</span>
 
 ```toml
 [package]
-name = "guessing_game"
+name = "kalkulyator"
 ```
 
-Even if you’ve chosen a unique name, when you run `cargo publish` to publish
-the crate at this point, you’ll get a warning and then an error:
+Noyob nom tanlagan bo'lsangiz ham, ushbu nuqtada crateni nashr qilish uchun `cargo publish` ni ishga tushirganingizda, siz ogohlantirish va keyin xatolikni olasiz:
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-01/
@@ -290,70 +199,45 @@ Caused by:
   the remote server responded with an error: missing or empty metadata fields: description, license. Please see https://doc.rust-lang.org/cargo/reference/manifest.html for how to upload metadata
 ```
 
-This errors because you’re missing some crucial information: a description and
-license are required so people will know what your crate does and under what
-terms they can use it. In *Cargo.toml*, add a description that's just a
-sentence or two, because it will appear with your crate in search results. For
-the `license` field, you need to give a *license identifier value*. The [Linux
-Foundation’s Software Package Data Exchange (SPDX)][spdx] lists the identifiers
-you can use for this value. For example, to specify that you’ve licensed your
-crate using the MIT License, add the `MIT` identifier:
+Bu xato, chunki sizda ba'zi muhim ma'lumotlar yetishmayapti: tavsif(description) va litsenziya talab qilinadi, shunda foydalanuvchilar sizning cratengiz nima qilishini va undan qanday shartlar ostida foydalanishlari mumkinligini bilishlari mumkin. *Cargo.toml* ga bir yoki ikki jumladan iborat tavsif(description) qo'shing, chunki u qidiruv natijalarida cratengiz bilan birga ko'rinadi. `license` maydoni uchun siz *litsenziya identifikatorining qiymatini* berishingiz kerak. [Linux
+Foundation’s Software Package Data Exchange (SPDX)][spdx] ushbu qiymat uchun foydalanishingiz mumkin bo'lgan identifikatorlarni sanab o'tadi. Masalan, MIT litsenziyasidan foydalangan holda cratengizni litsenziyalaganingizni ko'rsatish uchun `MIT` identifikatorini qo'shing:
 
-<span class="filename">Filename: Cargo.toml</span>
+<span class="filename">Fayl nomi: Cargo.toml</span>
 
 ```toml
 [package]
-name = "guessing_game"
+name = "kalkulyator"
 license = "MIT"
 ```
 
-If you want to use a license that doesn’t appear in the SPDX, you need to place
-the text of that license in a file, include the file in your project, and then
-use `license-file` to specify the name of that file instead of using the
-`license` key.
+Agar siz SPDX da ko'rinmaydigan litsenziyadan foydalanmoqchi bo'lsangiz, ushbu litsenziya matnini faylga joylashtirishingiz, faylni loyihangizga kiritishingiz kerak, va keyin `license` kalitidan foydalanish oʻrniga oʻsha fayl nomini koʻrsatish uchun `license-file` dan foydalaning.
 
-Guidance on which license is appropriate for your project is beyond the scope
-of this book. Many people in the Rust community license their projects in the
-same way as Rust by using a dual license of `MIT OR Apache-2.0`. This practice
-demonstrates that you can also specify multiple license identifiers separated
-by `OR` to have multiple licenses for your project.
+Loyihangiz uchun qaysi litsenziya to'g'ri kelishi haqidagi ko'rsatmalar ushbu kitob doirasidan tashqarida. Rust hamjamiyatidagi(community) ko'p odamlar o'z loyihalarini Rust bilan bir xil tarzda `MIT OR Apache-2.0` qo'sh litsenziyasidan foydalangan holda litsenziyalashadi. Ushbu amaliyot shuni ko'rsatadiki, loyihangiz uchun bir nechta litsenziyaga ega bo'lish uchun `OR` bilan ajratilgan bir nechta litsenziya identifikatorlarini ham belgilashingiz mumkin.
 
-With a unique name, the version, your description, and a license added, the
-*Cargo.toml* file for a project that is ready to publish might look like this:
+Noyob nom, versiya, tavsif(description) va litsenziya qoʻshilgan holda nashr etishga tayyor boʻlgan loyiha uchun *Cargo.toml* fayli quyidagicha koʻrinishi mumkin:
 
-<span class="filename">Filename: Cargo.toml</span>
+<span class="filename">Fayl nomi: Cargo.toml</span>
 
 ```toml
 [package]
-name = "guessing_game"
+name = "kalkulyator"
 version = "0.1.0"
 edition = "2021"
-description = "A fun game where you guess what number the computer has chosen."
+description = "Sanoq tizimlari bilan ishlaydigan kalkulyator"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
 ```
 
-[Cargo’s documentation](https://doc.rust-lang.org/cargo/) describes other
-metadata you can specify to ensure others can discover and use your crate more
-easily.
+[Cargo hujjatlarida](https://doc.rust-lang.org/cargo/) boshqalar sizning cratengizni osongina topishi va undan foydalanishi uchun siz belgilashingiz mumkin bo'lgan boshqa metama'lumotlar tasvirlangan.
 
-### Publishing to Crates.io
+### Crates.io-da nashr qilish
 
-Now that you’ve created an account, saved your API token, chosen a name for
-your crate, and specified the required metadata, you’re ready to publish!
-Publishing a crate uploads a specific version to
-[crates.io](https://crates.io/)<!-- ignore --> for others to use.
+Endi siz hisob(account) yaratdingiz, API tokeningizni saqladingiz, cratengiz uchun nom tanladingiz va kerakli metamaʼlumotlarni koʻrsatdingiz, siz nashr(publish) qilishga tayyorsiz! Crateni nashr qilish boshqalar foydalanishi uchun [crates.io](https://crates.io/)<!-- ignore --> saytiga ma'lum bir versiyani yuklaydi.
 
-Be careful, because a publish is *permanent*. The version can never be
-overwritten, and the code cannot be deleted. One major goal of
-[crates.io](https://crates.io/)<!-- ignore --> is to act as a permanent archive
-of code so that builds of all projects that depend on crates from
-[crates.io](https://crates.io/)<!-- ignore --> will continue to work. Allowing
-version deletions would make fulfilling that goal impossible. However, there is
-no limit to the number of crate versions you can publish.
+Ehtiyot bo'ling, chunki nashr *doimiydir(permanent)*. Versiyani hech qachon qayta yozib bo'lmaydi va kodni o'chirib bo'lmaydi.[crates.io](https://crates.io/)<!-- ignore --> -ning asosiy maqsadlaridan biri doimiy kod arxivi bo'lib xizmat qilishdir, shunda [crates.io](https://crates.io/)<!-- ignore -->-dan cratelarga bog'liq bo'lgan barcha loyihalar o'z ishini davom ettiradi. Versiyani o'chirishga ruxsat berish bu maqsadni amalga oshirishni imkonsiz qiladi. Biroq, siz nashr(publish) etishingiz mumkin bo'lgan crate versiyalari soniga cheklov yo'q.
 
-Run the `cargo publish` command again. It should succeed now:
+`cargo publish` buyrug'ini qayta ishga tushiring. Endi u muvaffaqiyatli bo'lishi kerak:
 
 <!-- manual-regeneration
 go to some valid crate, publish a new version
@@ -364,45 +248,32 @@ copy just the relevant lines below
 ```console
 $ cargo publish
     Updating crates.io index
-   Packaging guessing_game v0.1.0 (file:///projects/guessing_game)
-   Verifying guessing_game v0.1.0 (file:///projects/guessing_game)
-   Compiling guessing_game v0.1.0
-(file:///projects/guessing_game/target/package/guessing_game-0.1.0)
+   Packaging kalkulyator v0.1.0 (file:///projects/kalkulyator)
+   Verifying kalkulyator v0.1.0 (file:///projects/kalkulyator)
+   Compiling kalkulyator v0.1.0
+(file:///projects/kalkulyator/target/package/kalkulyator-0.1.0)
     Finished dev [unoptimized + debuginfo] target(s) in 0.19s
-   Uploading guessing_game v0.1.0 (file:///projects/guessing_game)
+   Uploading kalkulyator v0.1.0 (file:///projects/kalkulyator)
 ```
 
-Congratulations! You’ve now shared your code with the Rust community, and
-anyone can easily add your crate as a dependency of their project.
+Tabriklaymiz! Siz endi kodingizni Rust hamjamiyatiga(community) ulashdingiz va
+har kim o'z loyihasiga dependency sifatida cratengizni osongina qo'shishi mumkin.
 
-### Publishing a New Version of an Existing Crate
+### Mavjud cratening yangi versiyasini nashr qilish
 
-When you’ve made changes to your crate and are ready to release a new version,
-you change the `version` value specified in your *Cargo.toml* file and
-republish. Use the [Semantic Versioning rules][semver] to decide what an
-appropriate next version number is based on the kinds of changes you’ve made.
-Then run `cargo publish` to upload the new version.
+Cratengizga oʻzgartirishlar kiritib, yangi versiyani chiqarishga tayyor boʻlgach, *Cargo.toml* faylida koʻrsatilgan `version` qiymatini oʻzgartirasiz va qayta nashr qilasiz. Siz kiritgan o'zgartirishlar turiga qarab keyingi versiya raqami qanday bo'lishini aniqlash uchun [semantik versiya qoidalaridan][semver] foydalaning.
+Keyin yangi versiyani yuklash uchun `cargo publish`ni ishga tushiring.
 
 <!-- Old link, do not remove -->
 <a id="removing-versions-from-cratesio-with-cargo-yank"></a>
 
-### Deprecating Versions from Crates.io with `cargo yank`
+### Crates.io-dan `cargo yank` bilan eskirgan versiyalar
 
-Although you can’t remove previous versions of a crate, you can prevent any
-future projects from adding them as a new dependency. This is useful when a
-crate version is broken for one reason or another. In such situations, Cargo
-supports *yanking* a crate version.
+Cratening oldingi versiyalarini olib tashlamasangiz ham, kelajakdagi loyihalarni ularni yangi dependency sifatida qo'shishning oldini olishingiz mumkin. Bu crate versiyasi bir yoki boshqa sabablarga ko'ra buzilganda foydalidir. Bunday vaziyatlarda Cargo crate versiyasini *yanking(tortib)* olishni qo'llab-quvvatlaydi.
 
-Yanking a version prevents new projects from depending on that version while
-allowing all existing projects that depend on it to continue. Essentially, a
-yank means that all projects with a *Cargo.lock* will not break, and any future
-*Cargo.lock* files generated will not use the yanked version.
+Versiyani yanking o'zgartirish yangi loyihalarning ushbu versiyaga bog'lanishiga to'sqinlik qiladi, lekin shunga qaramay, unga bog'liq bo'lgan barcha mavjud loyihalarni ishlashni davom ettirishga imkon beradi. Aslini olganda, yank degani *Cargo.lock* bilan barcha loyihalar buzilmasligini va kelajakda yaratilgan *Cargo.lock* fayllari yanked versiyasidan foydalanmasligini anglatadi.
 
-To yank a version of a crate, in the directory of the crate that you’ve
-previously published, run `cargo yank` and specify which version you want to
-yank. For example, if we've published a crate named `guessing_game` version
-1.0.1 and we want to yank it, in the project directory for `guessing_game` we'd
-run:
+Cratening versiyasini tortib olish uchun siz avval nashr qilgan crate jildida  `cargo yank` ni ishga tushiring va qaysi versiyani yank qilishni belgilang. Misol uchun, agar biz `kalkulyator` nomli 1.0.1 versiyasini chop etgan bo'lsak va biz uni yank qilib olmoqchi bo'lsak, `kalkulyator` loyihasi jildida biz quyidagi amllarni bajaramiz:
 
 <!-- manual-regeneration:
 cargo yank carol-test --version 2.1.0
@@ -412,20 +283,18 @@ cargo yank carol-test --version 2.1.0 --undo
 ```console
 $ cargo yank --vers 1.0.1
     Updating crates.io index
-        Yank guessing_game@1.0.1
+        Yank kalkulyator@1.0.1
 ```
 
-By adding `--undo` to the command, you can also undo a yank and allow projects
-to start depending on a version again:
+Buyruqga `--undo` ni qo'shish orqali siz `yank` ni bekor qilishingiz va loyihalarni versiyaga qarab qaytadan boshlashga ruxsat berishingiz mumkin:
 
 ```console
 $ cargo yank --vers 1.0.1 --undo
     Updating crates.io index
-      Unyank guessing_game@1.0.1
+      Unyank kalkulyator@1.0.1
 ```
 
-A yank *does not* delete any code. It cannot, for example, delete accidentally
-uploaded secrets. If that happens, you must reset those secrets immediately.
+Yank *hech qanday kodni o'chirmaydi*. U, masalan, tasodifan yuklangan secretlarni o'chira olmaydi. Agar bu sodir bo'lsa, siz ushbu secretlarni darhol tiklashingiz kerak.
 
 [spdx]: http://spdx.org/licenses/
 [semver]: http://semver.org/
